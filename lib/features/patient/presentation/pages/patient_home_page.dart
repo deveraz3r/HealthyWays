@@ -1,10 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
-import 'package:healthyways/features/patient/presentation/controllers/patient_controller.dart';
 import 'package:healthyways/features/patient/presentation/pages/patient_more_page.dart';
 import 'package:healthyways/features/patient/presentation/widgets/patient_drawer.dart';
 
@@ -27,14 +23,6 @@ class _PatientHomePageState extends State<PatientHomePage> {
     const PlaceholderPage(title: "Med Cabinet"),
     const PlaceholderPage(title: "More"),
   ];
-
-  final _profileController = Get.find<AppProfileController>();
-  final _patientController = Get.find<PatientController>();
-  @override
-  void initState() {
-    super.initState();
-    _patientController.getPatientById(_profileController.profile.data!.uid);
-  }
 
   @override
   Widget build(BuildContext context) {

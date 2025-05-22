@@ -1,10 +1,10 @@
-import 'package:healthyways/core/common/custom_types/visiblity_type.dart';
+import 'package:healthyways/core/common/custom_types/visibility_type.dart';
 
-class Visiblity {
-  final VisiblityType type;
+class Visibility {
+  final VisibilityType type;
   final List<String> customAccess;
 
-  Visiblity({required this.type, required this.customAccess});
+  Visibility({required this.type, required this.customAccess});
 
   Map<String, dynamic> toJson() {
     return {
@@ -13,8 +13,8 @@ class Visiblity {
     };
   }
 
-  factory Visiblity.fromJson(Map<String, dynamic> json) {
-    return Visiblity(
+  factory Visibility.fromJson(Map<String, dynamic> json) {
+    return Visibility(
       type: VisiblityTypeExtension.fromJson(json['type']),
       customAccess: List<String>.from(json['customAccess'] ?? []),
     );

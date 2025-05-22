@@ -34,6 +34,6 @@ class StateController<ErrorType, DataType> {
 
   bool get isLoading => _state.value == State.loading;
   bool get isSuccess => _state.value == State.success;
-  bool get isError => _state.value == State.error;
+  bool get hasError => _state.value == State.error;
   bool get hasData => _data.value != null;
 }

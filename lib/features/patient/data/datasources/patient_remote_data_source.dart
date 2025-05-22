@@ -17,7 +17,7 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
     try {
       final response =
           await supabaseClient
-              .from("patients")
+              .from("fullPatientProfilesView")
               .select()
               .eq("uid", uid)
               .single();
@@ -26,8 +26,11 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
         return null;
       }
 
+      print("Response: $response");
+
       return PatientProfileModel.fromJson(response);
     } catch (e) {
+      print("Error in GetPatientByProfile: ${e.toString()}");
       throw ServerException(e.toString());
     }
   }

@@ -1,6 +1,6 @@
 import 'package:healthyways/core/common/custom_types/my_measurements.dart';
 import 'package:healthyways/core/common/custom_types/role.dart';
-import 'package:healthyways/core/common/custom_types/visiblity.dart';
+import 'package:healthyways/core/common/custom_types/visibility.dart';
 import 'package:healthyways/core/common/entites/patient_profile.dart';
 
 class PatientProfileModel extends PatientProfile {
@@ -12,16 +12,18 @@ class PatientProfileModel extends PatientProfile {
     required super.gender,
     required super.preferedLanguage,
     required super.selectedRole,
+
     required super.myMeasurements,
-    required super.race,
+    super.race,
     required super.isMarried,
     required super.emergencyContacts,
     required super.insuranceIds,
-    required super.globalVisiblity,
-    required super.allergiesVisiblity,
-    required super.immunizationsVisiblity,
-    required super.labReportsVisiblity,
-    required super.diariesVisiblity,
+    required super.globalVisibility,
+    required super.allergiesVisibility,
+    required super.immunizationsVisibility,
+    required super.labReportsVisibility,
+    required super.diariesVisibility,
+    super.createdAt,
   });
 
   factory PatientProfileModel.fromJson(Map<String, dynamic> json) {
@@ -32,19 +34,29 @@ class PatientProfileModel extends PatientProfile {
       lName: json['lName'] ?? "",
       gender: json['gender'] ?? "",
       preferedLanguage: json['preferedLanguage'] ?? "",
-      selectedRole: RoleExtension.fromJson(json['selectedRole']),
-      myMeasurements: MyMeasurements.fromJson(json['myMeasurements']),
-      race: json['race'] ?? "",
+      selectedRole: RoleExtension.fromJson(json['selectedRole'] ?? 'patient'),
+      myMeasurements:
+          (json['myMeasurements'] as List<dynamic>?)
+              ?.map((e) => MyMeasurements.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      race: json['race']?.toString(),
       isMarried: json['isMarried'] ?? false,
       emergencyContacts: List<String>.from(json['emergencyContacts'] ?? []),
       insuranceIds: List<String>.from(json['insuranceIds'] ?? []),
-      globalVisiblity: Visiblity.fromJson(json['globalVisiblity']),
-      allergiesVisiblity: Visiblity.fromJson(json['allergiesVisiblity']),
-      immunizationsVisiblity: Visiblity.fromJson(
-        json['immunizationsVisiblity'],
+      globalVisibility: Visibility.fromJson(json['globalVisibility'] ?? {}),
+      allergiesVisibility: Visibility.fromJson(
+        json['allergiesVisibility'] ?? {},
       ),
-      labReportsVisiblity: Visiblity.fromJson(json['labReportsVisiblity']),
-      diariesVisiblity: Visiblity.fromJson(json['diariesVisiblity']),
+      immunizationsVisibility: Visibility.fromJson(
+        json['immunizationVisibility'] ?? {},
+      ),
+      labReportsVisibility: Visibility.fromJson(
+        json['labReportsVisibility'] ?? {},
+      ),
+      diariesVisibility: Visibility.fromJson(json['diaryVisibility'] ?? {}),
+      createdAt:
+          json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
     );
   }
 
@@ -57,16 +69,17 @@ class PatientProfileModel extends PatientProfile {
       'gender': gender,
       'preferedLanguage': preferedLanguage,
       'selectedRole': selectedRole.toJson(),
-      'myMeasurements': myMeasurements.toJson(),
+      'myMeasurements': myMeasurements.map((e) => e.toJson()).toList(),
       'race': race,
       'isMarried': isMarried,
       'emergencyContacts': emergencyContacts,
       'insuranceIds': insuranceIds,
-      'globalVisiblity': globalVisiblity.toJson(),
-      'allergiesVisiblity': allergiesVisiblity.toJson(),
-      'immunizationsVisiblity': immunizationsVisiblity.toJson(),
-      'labReportsVisiblity': labReportsVisiblity.toJson(),
-      'diariesVisiblity': diariesVisiblity.toJson(),
+      'globalVisibility': globalVisibility.toJson(),
+      'allergiesVisibility': allergiesVisibility.toJson(),
+      'immunizationVisibility': immunizationsVisibility.toJson(),
+      'labReportsVisibility': labReportsVisibility.toJson(),
+      'diaryVisibility': diariesVisibility.toJson(),
+      'createdAt': createdAt?.toIso8601String(),
     };
   }
 }

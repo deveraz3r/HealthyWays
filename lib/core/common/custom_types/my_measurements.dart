@@ -1,8 +1,8 @@
-import 'package:healthyways/core/common/custom_types/visiblity.dart';
+import 'package:healthyways/core/common/custom_types/visibility.dart';
 
 class MyMeasurements {
   String id;
-  Visiblity visiblity;
+  Visibility visiblity;
   bool isActive;
 
   MyMeasurements({
@@ -22,7 +22,7 @@ class MyMeasurements {
   factory MyMeasurements.fromJson(Map<String, dynamic> json) {
     return MyMeasurements(
       id: json['id'] ?? "",
-      visiblity: Visiblity.fromJson(json['visiblity']),
+      visiblity: Visibility.fromJson(json['visiblity']),
       isActive: json["isActive"] ?? false,
     );
   }
