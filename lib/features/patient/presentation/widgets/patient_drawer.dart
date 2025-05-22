@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_patient_controller.dart';
+import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 
 class PatientDrawer extends StatelessWidget {
   const PatientDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final appPatientController = Get.find<AppPatientController>();
+    final appPatientController = Get.find<AppProfileController>();
 
     return Drawer(
       child: Obx(() {
-        if (appPatientController.patient.isLoading) {
+        if (appPatientController.profile.isLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (appPatientController.patient.hasError) {
+        } else if (appPatientController.profile.hasError) {
           return Center(
             child: Text(
-              'Error: ${appPatientController.patient.errorMessage?.message}',
+              'Error: ${appPatientController.profile.errorMessage?.message}',
             ),
           );
-        } else if (appPatientController.patient.hasData) {
-          final patient = appPatientController.patient.data!;
+        } else if (appPatientController.profile.hasData) {
+          final patient = appPatientController.profile.data!;
           return ListView(
             children: [
               DrawerHeader(

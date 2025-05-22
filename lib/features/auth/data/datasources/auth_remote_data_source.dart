@@ -1,24 +1,27 @@
+import 'package:healthyways/core/common/custom_types/role.dart';
+import 'package:healthyways/core/common/entites/profile.dart';
+import 'package:healthyways/core/constants/supabase_tables.dart';
 import 'package:healthyways/core/error/exceptions.dart';
-import 'package:healthyways/features/auth/data/models/profile_model.dart';
+import 'package:healthyways/features/auth/data/factories/profile_factory.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class AuthRemoteDataSource {
   Session? get currentUserSession;
 
-  Future<ProfileModel?> getCurrentUserData();
+  Future<Profile?> getCurrentUserData();
 
-  Future<ProfileModel> signInWithEmailAndPassword({
+  Future<Profile> signInWithEmailAndPassword({
     required String email,
     required String password,
   });
 
-  Future<ProfileModel> signUpWithEmailAndPassword({
+  Future<Profile> signUpWithEmailAndPassword({
     required String fName,
     required String lName,
     required String gender,
     required String email,
     required String password,
-    required String selectedRole,
+    required String? selectedRole,
   });
 
   Future<void> signOut();
@@ -32,32 +35,51 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Session? get currentUserSession => supabaseClient.auth.currentSession;
 
   @override
-  Future<ProfileModel?> getCurrentUserData() async {
+  Future<Profile?> getCurrentUserData() async {
     try {
       if (currentUserSession == null) {
         return null;
       }
 
-      // Fetch base user data from "users" table
+      // Fetch base user data from "profiles" table
       final baseResponse =
           await supabaseClient
-              .from("profiles")
+              .from(SupabaseTables.baseProfileTable)
               .select()
               .eq("uid", currentUserSession!.user.id)
               .single();
 
-      final baseProfile = ProfileModel.fromJson(
-        baseResponse,
-      ).copyWith(email: currentUserSession!.user.email);
+      final role = RoleExtension.fromJson(baseResponse['selectedRole']);
 
-      return baseProfile;
+      // Based on role, fetch complete profile from appropriate view
+      final response =
+          await supabaseClient
+              .from(_getViewName(role))
+              .select()
+              .eq("uid", currentUserSession!.user.id)
+              .single();
+
+      return ProfileFactory.createProfileFromJson(response);
     } catch (e) {
       throw ServerException(e.toString());
     }
   }
 
+  String _getViewName(Role role) {
+    switch (role) {
+      case Role.patient:
+        return SupabaseTables.fullPatientProfilesView;
+      case Role.doctor:
+        return SupabaseTables.fullDoctorProfilesView;
+      case Role.pharmacist:
+        return SupabaseTables.fullPharmacistProfilesView;
+      default:
+        return SupabaseTables.baseProfileTable;
+    }
+  }
+
   @override
-  Future<ProfileModel> signInWithEmailAndPassword({
+  Future<Profile> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
@@ -71,7 +93,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw ServerException("User is null");
       }
 
-      final ProfileModel? profile = await getCurrentUserData();
+      final Profile? profile = await getCurrentUserData();
 
       return profile!;
     } catch (e) {
@@ -80,13 +102,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<ProfileModel> signUpWithEmailAndPassword({
+  Future<Profile> signUpWithEmailAndPassword({
     required String fName,
     required String lName,
     required String gender,
     required String email,
     required String password,
-    required String selectedRole,
+    required String? selectedRole,
   }) async {
     try {
       final response = await supabaseClient.auth.signUp(
@@ -96,7 +118,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           "fName": fName,
           "lName": lName,
           "gender": gender,
-          "selectedRole": selectedRole,
+          "selectedRole": selectedRole ?? "patient",
         },
       );
 
@@ -104,7 +126,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw ServerException("User is null");
       }
 
-      final ProfileModel? profile = await getCurrentUserData();
+      final Profile? profile = await getCurrentUserData();
 
       return profile!;
     } catch (e) {

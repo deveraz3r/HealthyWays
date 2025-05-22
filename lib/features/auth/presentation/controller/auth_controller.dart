@@ -51,7 +51,7 @@ class AuthController extends GetxController {
     required String fName,
     required String lName,
     required String gender,
-    required String selectedRole,
+    required String? selectedRole,
   }) async {
     profile.setLoading();
 

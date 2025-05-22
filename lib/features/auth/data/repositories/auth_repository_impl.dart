@@ -47,7 +47,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String gender,
     required String email,
     required String password,
-    required String selectedRole,
+    required String? selectedRole,
   }) async {
     return _getUser(
       () async => await remoteDataSource.signUpWithEmailAndPassword(

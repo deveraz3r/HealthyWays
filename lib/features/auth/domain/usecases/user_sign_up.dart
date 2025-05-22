@@ -27,7 +27,7 @@ class UserSignUpParams {
   final String gender;
   final String email;
   final String password;
-  final String selectedRole;
+  final String? selectedRole;
 
   UserSignUpParams({
     required this.email,
@@ -35,6 +35,6 @@ class UserSignUpParams {
     required this.fName,
     required this.lName,
     required this.gender,
-    required this.selectedRole,
+    this.selectedRole,
   });
 }
