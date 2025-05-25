@@ -8,6 +8,7 @@ class StateController<ErrorType, DataType> {
 
   State get state => _state.value;
   Rx<State> get rxState => _state;
+  Rx<DataType?> get rxData => _data;
   DataType? get data => _data.value;
   ErrorType? get errorMessage => _errorMessage.value;
 

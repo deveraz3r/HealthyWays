@@ -3,7 +3,7 @@ import 'package:healthyways/core/common/entites/patient_profile.dart';
 import 'package:healthyways/core/error/exceptions.dart';
 import 'package:healthyways/core/error/failure.dart';
 import 'package:healthyways/features/patient/data/datasources/patient_remote_data_source.dart';
-import 'package:healthyways/features/patient/data/models/patient_profile_model.dart';
+import 'package:healthyways/features/auth/data/models/patient_profile_model.dart';
 import 'package:healthyways/features/patient/domain/repositories/patient_repository.dart';
 
 class PatientRepositoryImpl implements PatientRepository {

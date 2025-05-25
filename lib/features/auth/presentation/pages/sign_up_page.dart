@@ -75,7 +75,7 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 15),
                 AuthDropdownField(
                   controller: _genderController,
-                  items: const ['Male', 'Female', 'Other'],
+                  items: const ['Male', 'Female', 'Prefer not to say'],
                   hintText: "Select Gender",
                 ),
                 AuthDropdownField(
@@ -106,7 +106,8 @@ class _SignupPageState extends State<SignupPage> {
                         gender: _genderController.text,
                         email: _emailController.text,
                         password: _passwordController.text,
-                        selectedRole: _roleController.text,
+                        //remove if you want new usesr to always be patient
+                        selectedRole: _roleController.text, //nullable
                       );
                     }
                   },

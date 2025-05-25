@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/features/medication/presentation/pages/medications_home_page.dart';
 import 'package:healthyways/features/patient/presentation/pages/patient_more_page.dart';
 import 'package:healthyways/features/patient/presentation/widgets/patient_drawer.dart';
 
@@ -17,7 +18,7 @@ class _PatientHomePageState extends State<PatientHomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const PlaceholderPage(title: "Pill Box"),
+    MedicationsHomePage(),
     const PlaceholderPage(title: "Updates"),
     const PlaceholderPage(title: "Reports"),
     const PlaceholderPage(title: "Med Cabinet"),

@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+import 'package:healthyways/core/common/controllers/app_medications_controller.dart';
 import 'package:healthyways/core/common/controllers/app_patient_controller.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -15,6 +17,14 @@ import 'package:healthyways/features/doctor/domain/usecases/get_all_doctors.dart
 import 'package:healthyways/features/doctor/domain/usecases/get_doctor_by_id.dart';
 import 'package:healthyways/features/doctor/domain/usecases/update_doctor_profile.dart';
 import 'package:healthyways/features/doctor/presentation/controllers/doctor_controller.dart';
+import 'package:healthyways/features/medication/data/datasources/dummy_remote_data_source_impl.dart';
+import 'package:healthyways/features/medication/data/datasources/medications_remote_data_source.dart';
+import 'package:healthyways/features/medication/data/repositories/medication_repository_impl.dart';
+import 'package:healthyways/features/medication/domain/repositories/medication_repository.dart';
+import 'package:healthyways/features/medication/domain/usecases/get_all_medications.dart';
+import 'package:healthyways/features/medication/domain/usecases/get_all_medicines.dart';
+import 'package:healthyways/features/medication/domain/usecases/toggle_medication_status_by_id.dart';
+import 'package:healthyways/features/medication/presentation/controllers/medication_controller.dart';
 import 'package:healthyways/features/patient/data/datasources/patient_remote_data_source.dart';
 import 'package:healthyways/features/patient/data/repositories/patient_repository_impl.dart';
 import 'package:healthyways/features/patient/domain/repositories/patient_repository.dart';
@@ -46,11 +56,15 @@ Future<void> initDependencies() async {
   );
   serviceLocator.registerSingleton<SupabaseClient>(supabase.client);
 
+  //TODO: remove after adding valid datasource
+  Get.lazyPut<DummyMedicationSource>(() => DummyMedicationSource());
+
   // Initialize feature-specific dependencies
   _initAuth();
   _initPatient();
-  _initDoctor();
-  _initPharmacist();
+  _initMedications();
+  // _initDoctor();
+  // _initPharmacist();
 }
 
 void _initAuth() {
@@ -130,6 +144,44 @@ void _initPatient() {
   serviceLocator.registerSingleton<AppPatientController>(
     AppPatientController(
       patientController: serviceLocator<PatientController>(),
+    ),
+  );
+}
+
+void _initMedications() {
+  // Data sources
+  serviceLocator.registerFactory<MedicationsRemoteDataSource>(
+    () => MedicationsDummyRemoteDataSourceImpl(),
+    //TODO: replace with actual Datasource
+  );
+
+  // Repositories
+  serviceLocator.registerFactory<MedicationRepository>(
+    () =>
+        MedicationRepositoryImpl(serviceLocator<MedicationsRemoteDataSource>()),
+  );
+
+  // Use cases
+  serviceLocator
+    ..registerFactory<GetAllMedicines>(
+      () => GetAllMedicines(serviceLocator<MedicationRepository>()),
+    )
+    ..registerFactory<GetAllMedications>(
+      () => GetAllMedications(serviceLocator<MedicationRepository>()),
+    )
+    ..registerFactory<ToggleMedicationStatusById>(
+      () => ToggleMedicationStatusById(serviceLocator<MedicationRepository>()),
+    );
+
+  // App-level controller
+  serviceLocator.registerSingleton(() => AppMedicationsController());
+
+  // Controller
+  serviceLocator.registerSingleton<MedicationController>(
+    MedicationController(
+      getAllMedicines: serviceLocator<GetAllMedicines>(),
+      getAllMedications: serviceLocator<GetAllMedications>(),
+      toggleMedicationStatusById: serviceLocator<ToggleMedicationStatusById>(),
     ),
   );
 }

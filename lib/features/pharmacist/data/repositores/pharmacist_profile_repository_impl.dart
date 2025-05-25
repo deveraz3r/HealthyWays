@@ -2,7 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:healthyways/core/common/entites/pharmacist_profile.dart';
 import 'package:healthyways/core/error/failure.dart';
 import 'package:healthyways/features/pharmacist/data/datasources/pharmacist_remote_data_source.dart';
-import 'package:healthyways/features/pharmacist/data/models/pharmacist_profile_model.dart';
+import 'package:healthyways/features/auth/data/models/pharmacist_profile_model.dart';
 import 'package:healthyways/features/pharmacist/domain/repositories/pharmacist_repository.dart';
 
 class PharmacistRepositoryImpl implements PharmacistRepository {

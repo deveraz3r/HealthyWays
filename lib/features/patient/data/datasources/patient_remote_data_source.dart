@@ -1,5 +1,5 @@
 import 'package:healthyways/core/error/exceptions.dart';
-import 'package:healthyways/features/patient/data/models/patient_profile_model.dart';
+import 'package:healthyways/features/auth/data/models/patient_profile_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class PatientRemoteDataSource {

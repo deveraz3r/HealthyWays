@@ -2,7 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:healthyways/core/common/entites/doctor_profile.dart';
 import 'package:healthyways/core/error/failure.dart';
 import 'package:healthyways/features/doctor/data/datasources/doctor_remote_data_source.dart';
-import 'package:healthyways/features/doctor/data/models/doctor_profile_model.dart';
+import 'package:healthyways/features/auth/data/models/doctor_profile_model.dart';
 import 'package:healthyways/features/doctor/domain/repositories/doctor_repository.dart';
 
 class DoctorRepositoryImpl implements DoctorRepository {
