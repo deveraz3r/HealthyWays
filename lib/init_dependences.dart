@@ -39,6 +39,12 @@ import 'package:healthyways/features/pharmacist/domain/usecases/get_all_pharmaci
 import 'package:healthyways/features/pharmacist/domain/usecases/get_pharmacist_by_id.dart';
 import 'package:healthyways/features/pharmacist/domain/usecases/update_pharmacist_profile.dart';
 import 'package:healthyways/features/pharmacist/presentation/controllers/pharmacist_controller.dart';
+import 'package:healthyways/features/updates/data/datasources/i_updates_remote_data_source.dart';
+import 'package:healthyways/features/updates/data/datasources/updates_dummy_data_source.dart';
+import 'package:healthyways/features/updates/data/repositories/updates_repository_impl.dart';
+import 'package:healthyways/features/updates/domain/repositories/updates_repository.dart';
+import 'package:healthyways/features/updates/domain/usecases/get_all_medication_schedule_report.dart';
+import 'package:healthyways/features/updates/presentation/controllers/updates_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
@@ -58,11 +64,13 @@ Future<void> initDependencies() async {
 
   //TODO: remove after adding valid datasource
   Get.lazyPut<DummyMedicationSource>(() => DummyMedicationSource());
+  Get.lazyPut<UpdatesDummyController>(() => UpdatesDummyController());
 
   // Initialize feature-specific dependencies
   _initAuth();
   _initPatient();
   _initMedications();
+  _initUpdates();
   // _initDoctor();
   // _initPharmacist();
 }
@@ -182,6 +190,35 @@ void _initMedications() {
       getAllMedicines: serviceLocator<GetAllMedicines>(),
       getAllMedications: serviceLocator<GetAllMedications>(),
       toggleMedicationStatusById: serviceLocator<ToggleMedicationStatusById>(),
+    ),
+  );
+}
+
+void _initUpdates() {
+  // Data sources
+  serviceLocator.registerFactory<IUpdatesRemoteDataSource>(
+    () => UpdatesDummyDataSource(),
+    //TODO: replace with actual Datasource
+  );
+
+  // Repositories
+  serviceLocator.registerFactory<UpdatesRepository>(
+    () => UpdatesRepositoryImpl(serviceLocator<IUpdatesRemoteDataSource>()),
+  );
+
+  // Use cases
+  serviceLocator.registerFactory<GetAllMedicationScheduleReport>(
+    () => GetAllMedicationScheduleReport(serviceLocator<UpdatesRepository>()),
+  );
+
+  // // App-level controller
+  // serviceLocator.registerSingleton(() => AppMedicationsController());
+
+  // Controller
+  serviceLocator.registerSingleton<UpdatesController>(
+    UpdatesController(
+      getAllMedicationScheduleReport:
+          serviceLocator<GetAllMedicationScheduleReport>(),
     ),
   );
 }

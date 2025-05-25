@@ -173,6 +173,9 @@ class _MedicationsHomePageState extends State<MedicationsHomePage> {
                     AppPallete.backgroundColor2,
                   ],
                 ),
+                // color: AppPallete.backgroundColor.withAlpha(
+                //   (0.2 * 255).round(),
+                // ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: AppPallete.gradient1.withOpacity(0.3),

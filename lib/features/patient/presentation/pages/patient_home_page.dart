@@ -4,6 +4,7 @@ import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/medication/presentation/pages/medications_home_page.dart';
 import 'package:healthyways/features/patient/presentation/pages/patient_more_page.dart';
 import 'package:healthyways/features/patient/presentation/widgets/patient_drawer.dart';
+import 'package:healthyways/features/updates/presentation/pages/updates_home_page.dart';
 
 class PatientHomePage extends StatefulWidget {
   static route() =>
@@ -19,7 +20,8 @@ class _PatientHomePageState extends State<PatientHomePage> {
 
   final List<Widget> _pages = [
     MedicationsHomePage(),
-    const PlaceholderPage(title: "Updates"),
+    UpdatesHomePage(),
+    // const PlaceholderPage(title: "Updates"),
     const PlaceholderPage(title: "Reports"),
     const PlaceholderPage(title: "Med Cabinet"),
     const PlaceholderPage(title: "More"),
@@ -29,8 +31,13 @@ class _PatientHomePageState extends State<PatientHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Home Page"),
-        actions: _patientHomeActionWidget(_currentIndex),
+        title: const Text("Healthy Ways"),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(CupertinoIcons.chat_bubble_2_fill),
+          ),
+        ],
         backgroundColor: AppPallete.backgroundColor2,
       ),
       drawer: PatientDrawer(),
@@ -79,26 +86,26 @@ class PlaceholderPage extends StatelessWidget {
   }
 }
 
-List<Widget> _patientHomeActionWidget(int index) {
-  switch (index) {
-    case 0: // Pill Box
-      return [
-        IconButton(
-          icon: const Icon(CupertinoIcons.add),
-          onPressed: () {
-            // Example: Add new pill
-          },
-        ),
-      ];
-    case 1: // Updates
-      return [];
-    case 2: // Reports
-      return [];
-    case 3: // Med Cabinet
-      return [];
-    case 4: // More
-      return [];
-    default:
-      return [];
-  }
-}
+// List<Widget> _patientHomeActionWidget(int index) {
+//   switch (index) {
+//     case 0: // Pill Box
+//       return [
+//         IconButton(
+//           icon: const Icon(CupertinoIcons.add),
+//           onPressed: () {
+//             // Example: Add new pill
+//           },
+//         ),
+//       ];
+//     case 1: // Updates
+//       return [];
+//     case 2: // Reports
+//       return [];
+//     case 3: // Med Cabinet
+//       return [];
+//     case 4: // More
+//       return [];
+//     default:
+//       return [];
+//   }
+// }

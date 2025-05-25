@@ -77,20 +77,14 @@ class MedicationCard extends StatelessWidget {
   }
 
   void _handleTap(BuildContext context, MedicationController controller) {
-    // If medication is already taken, just unmark it
     if (medication.isTaken) {
-      controller.toggleMedicationStatusById(
-        id: medication.id,
-        timeTaken: null, // Set to null when unmarking
-      );
+      controller.toggleMedicationStatusById(id: medication.id, timeTaken: null);
     } else {
-      // If not taken, show time selection dialog
       _showTimeSelectionDialog(context, controller);
     }
   }
 
   Widget _buildAssignedBy() {
-    // If doctor information is available (not null)
     if (medication.doctorFName != null && medication.doctorFName.isNotEmpty) {
       return Row(
         children: [
@@ -114,7 +108,7 @@ class MedicationCard extends StatelessWidget {
           Expanded(
             child: Text(
               'Dr. ${medication.doctorFName}',
-              style: TextStyle(fontSize: 12, color: AppPallete.greyColor),
+              style: TextStyle(fontSize: 13, color: AppPallete.greyColor),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -123,7 +117,6 @@ class MedicationCard extends StatelessWidget {
       );
     }
 
-    // If self-assigned (doctor info is null)
     return Row(
       children: [
         Container(
@@ -133,7 +126,7 @@ class MedicationCard extends StatelessWidget {
             color: AppPallete.backgroundColor2,
             shape: BoxShape.circle,
             border: Border.all(
-              color: AppPallete.greyColor.withOpacity(0.3),
+              color: AppPallete.greyColor.withAlpha((0.3 * 255).round()),
               width: 1,
             ),
           ),
@@ -147,7 +140,7 @@ class MedicationCard extends StatelessWidget {
         Text(
           'Self-assigned',
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 13,
             color: AppPallete.greyColor,
             fontStyle: FontStyle.italic,
           ),
@@ -172,7 +165,7 @@ class MedicationCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppPallete.gradient1.withOpacity(0.2),
+                AppPallete.gradient1.withAlpha((0.2 * 255).round()),
                 AppPallete.backgroundColor2,
               ],
             ),
@@ -182,7 +175,6 @@ class MedicationCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Row with icon and medicine name/dosage
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -207,7 +199,7 @@ class MedicationCard extends StatelessWidget {
                         Text(
                           medication.medicine.name,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 17,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1,
@@ -217,7 +209,7 @@ class MedicationCard extends StatelessWidget {
                         Text(
                           '${medication.medicine.dosage} ${medication.medicine.unit}',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             color: AppPallete.greyColor,
                           ),
                         ),
@@ -228,46 +220,51 @@ class MedicationCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              _buildAssignedBy(), // Keep existing method
+              _buildAssignedBy(),
               const SizedBox(height: 8),
 
-              /// Mark as taken button
               InkWell(
                 onTap: () => _handleTap(context, controller),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 6,
-                    horizontal: 8,
-                  ),
+                  constraints: const BoxConstraints(minHeight: 36),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
                     color:
                         medication.isTaken
                             ? AppPallete.backgroundColor2
-                            : AppPallete.gradient1.withOpacity(0.1),
+                            : AppPallete.gradient1.withAlpha(
+                              (0.1 * 255).round(),
+                            ),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
                       color:
                           medication.isTaken
-                              ? AppPallete.greyColor.withOpacity(0.3)
-                              : AppPallete.gradient1.withOpacity(0.3),
+                              ? AppPallete.greyColor.withAlpha(
+                                (0.3 * 255).round(),
+                              )
+                              : AppPallete.gradient1.withAlpha(
+                                (0.3 * 255).round(),
+                              ),
                     ),
                   ),
                   child:
                       medication.isTaken && medication.takenTime != null
                           ? Row(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.check,
-                                size: 14,
+                                size: 16,
                                 color: AppPallete.greyColor,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 6),
                               Text(
                                 'Taken at ${DateFormat('hh:mm a').format(medication.takenTime!)}',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 14,
                                   color: AppPallete.greyColor,
                                 ),
                               ),
@@ -275,11 +272,10 @@ class MedicationCard extends StatelessWidget {
                           )
                           : Text(
                             'Mark as taken',
-                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 14,
                               color: AppPallete.gradient1,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                 ),
