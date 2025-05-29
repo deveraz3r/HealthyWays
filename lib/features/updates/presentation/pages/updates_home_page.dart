@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:healthyways/core/theme/app_pallete.dart';
-import 'package:healthyways/features/updates/data/models/medication_schedule_report_model.dart';
-import 'package:healthyways/features/updates/domain/entites/medications_schedule_report.dart';
 import 'package:healthyways/features/updates/presentation/controllers/updates_controller.dart';
 import 'package:healthyways/features/updates/presentation/widgets/medication_schedule_report_widget.dart';
 import 'package:healthyways/init_dependences.dart';
-import 'package:intl/intl.dart';
 
 class UpdatesHomePage extends StatefulWidget {
   static route() =>

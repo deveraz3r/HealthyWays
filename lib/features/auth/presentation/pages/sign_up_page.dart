@@ -5,7 +5,7 @@ import 'package:healthyways/features/auth/presentation/controller/auth_controlle
 import 'package:healthyways/core/controller/state.dart' as controller;
 import 'package:healthyways/features/auth/presentation/widgets/auth_dropdown_field.dart';
 import 'package:healthyways/features/auth/presentation/widgets/auth_field.dart';
-import 'package:healthyways/features/auth/presentation/widgets/auth_gradient_button.dart';
+import 'package:healthyways/core/common/widgets/primary_gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -96,7 +96,7 @@ class _SignupPageState extends State<SignupPage> {
                   obscureText: true,
                 ),
                 const SizedBox(height: 20),
-                AuthGradientButton(
+                PrimaryGradientButton(
                   buttonText: "Sign Up",
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {

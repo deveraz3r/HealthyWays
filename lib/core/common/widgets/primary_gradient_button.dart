@@ -1,10 +1,10 @@
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:flutter/material.dart';
 
-class AuthGradientButton extends StatelessWidget {
+class PrimaryGradientButton extends StatelessWidget {
   final String buttonText;
   final VoidCallback onPressed;
-  const AuthGradientButton({
+  const PrimaryGradientButton({
     super.key,
     required this.buttonText,
     required this.onPressed,

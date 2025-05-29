@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/features/medication/presentation/pages/add_new_medication_page.dart';
 
 class PatientMorePage extends StatelessWidget {
   static route() =>
@@ -41,6 +42,7 @@ class PatientMorePage extends StatelessWidget {
         'title': 'Add Medication',
         'icon': Icons.add,
         'onTap': () {
+          Navigator.push(context, AddNewMedicationPage.route());
           print("Add Medication tapped");
         },
       },
