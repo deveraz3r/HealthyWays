@@ -1,5 +1,5 @@
 import 'package:healthyways/core/error/exceptions.dart';
-import 'package:healthyways/features/auth/data/models/patient_profile_model.dart';
+import 'package:healthyways/core/common/models/patient_profile_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class PatientRemoteDataSource {
@@ -15,18 +15,11 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
   @override
   Future<PatientProfileModel?> getPatientProfileById(String uid) async {
     try {
-      final response =
-          await supabaseClient
-              .from("fullPatientProfilesView")
-              .select()
-              .eq("uid", uid)
-              .single();
+      final response = await supabaseClient.from("fullPatientProfilesView").select().eq("uid", uid).single();
 
       if (response.isEmpty) {
         return null;
       }
-
-      print("Response: $response");
 
       return PatientProfileModel.fromJson(response);
     } catch (e) {
@@ -38,10 +31,7 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
   @override
   Future<void> updatePatientProfile(PatientProfileModel profile) async {
     try {
-      final response = await supabaseClient
-          .from("patients")
-          .update(profile.toJson())
-          .eq("uid", profile.uid);
+      final response = await supabaseClient.from("patients").update(profile.toJson()).eq("uid", profile.uid);
 
       if (response == null) {
         throw ServerException("Failed to update patient profile");
@@ -56,9 +46,7 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
     try {
       final response = await supabaseClient.from("patients").select();
 
-      return (response as List)
-          .map((data) => PatientProfileModel.fromJson(data))
-          .toList();
+      return (response as List).map((data) => PatientProfileModel.fromJson(data)).toList();
     } catch (e) {
       throw ServerException(e.toString());
     }

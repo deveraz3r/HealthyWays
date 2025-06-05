@@ -19,11 +19,7 @@ class PatientDrawer extends StatelessWidget {
         if (appPatientController.profile.isLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (appPatientController.profile.hasError) {
-          return Center(
-            child: Text(
-              'Error: ${appPatientController.profile.errorMessage?.message}',
-            ),
-          );
+          return Center(child: Text('Error: ${appPatientController.profile.error?.message}'));
         } else if (appPatientController.profile.hasData) {
           final patient = appPatientController.profile.data!;
           return ListView(
@@ -33,31 +29,19 @@ class PatientDrawer extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: AssetImage(
-                        'assets/images/profile_placeholder.png',
-                      ),
-                    ),
+                    CircleAvatar(radius: 40, backgroundImage: AssetImage('assets/images/profile_placeholder.png')),
                     const SizedBox(width: 10),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           '${patient.fName ?? "Unknown"} ${patient.lName ?? "User"}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 5),
                         Text(
                           patient.email ?? "No email available",
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
+                          style: const TextStyle(color: Colors.white70, fontSize: 14),
                         ),
                       ],
                     ),
@@ -71,19 +55,12 @@ class PatientDrawer extends StatelessWidget {
                   Navigator.push(context, PatientDemographicsPage.route());
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.verified_user),
-                title: const Text('Insurance'),
-                onTap: () {},
-              ),
+              ListTile(leading: const Icon(Icons.verified_user), title: const Text('Insurance'), onTap: () {}),
               ListTile(
                 leading: const Icon(Icons.remove_red_eye),
                 title: const Text('Visiblity'),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    PatientVisibilitySettingsPage.route(),
-                  );
+                  Navigator.push(context, PatientVisibilitySettingsPage.route());
                 },
               ),
               ListTile(
@@ -93,11 +70,7 @@ class PatientDrawer extends StatelessWidget {
                   Navigator.push(context, PatientSettingsPage.route());
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.help),
-                title: const Text('Help & Support'),
-                onTap: () {},
-              ),
+              ListTile(leading: const Icon(Icons.help), title: const Text('Help & Support'), onTap: () {}),
             ],
           );
         } else {

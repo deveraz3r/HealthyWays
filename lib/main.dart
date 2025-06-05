@@ -2,6 +2,7 @@ import 'package:healthyways/core/common/controllers/app_profile_controller.dart'
 import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/theme/app_theme.dart';
 import 'package:healthyways/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:healthyways/features/measurements/presentation/controllers/measurement_controller.dart';
 import 'package:healthyways/features/medication/presentation/controllers/medication_controller.dart';
 import 'package:healthyways/features/patient/presentation/pages/patient_home_page.dart';
 import 'package:healthyways/init_controllers.dart';
@@ -23,6 +24,7 @@ void main() async {
 
   //TODO: remove after adding a permenant fix
   await Get.find<MedicationController>().getAllMedications();
+  await Get.find<MeasurementController>().getAllMeasurements();
 
   runApp(MyApp());
 }

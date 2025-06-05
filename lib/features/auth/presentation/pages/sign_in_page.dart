@@ -34,9 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     // Listen for state changes and show Snackbar on error
     ever(_authController.profile.rxState, (state) {
       if (state == controller.State.error) {
-        final errorMessage =
-            _authController.profile.errorMessage?.message ??
-            "An error occurred.";
+        final errorMessage = _authController.profile.error?.message ?? "An error occurred.";
         showSnackbar(context, errorMessage);
       }
     });
@@ -66,27 +64,17 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Sign In.',
-                  style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
-                ),
+                const Text('Sign In.', style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 30),
                 AuthField(hintText: "Email", controller: _emailController),
                 const SizedBox(height: 15),
-                AuthField(
-                  hintText: "Password",
-                  controller: _passwordController,
-                  obscureText: true,
-                ),
+                AuthField(hintText: "Password", controller: _passwordController, obscureText: true),
                 const SizedBox(height: 20),
                 PrimaryGradientButton(
                   buttonText: "Login",
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      _authController.signIn(
-                        email: _emailController.text,
-                        password: _passwordController.text,
-                      );
+                      _authController.signIn(email: _emailController.text, password: _passwordController.text);
                     }
                   },
                 ),
@@ -102,8 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         TextSpan(
                           text: "Sign Up",
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(color: AppPallete.gradient2),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppPallete.gradient2),
                         ),
                       ],
                     ),

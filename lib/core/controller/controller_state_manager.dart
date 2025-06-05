@@ -4,17 +4,17 @@ import 'state.dart';
 class StateController<ErrorType, DataType> {
   final _state = Rx<State>(State.initial);
   final _data = Rxn<DataType>();
-  final _errorMessage = Rxn<ErrorType>();
+  final _error = Rxn<ErrorType>();
 
   State get state => _state.value;
   Rx<State> get rxState => _state;
   Rx<DataType?> get rxData => _data;
   DataType? get data => _data.value;
-  ErrorType? get errorMessage => _errorMessage.value;
+  ErrorType? get error => _error.value;
 
   void setLoading() {
     _state.value = State.loading;
-    _errorMessage.value = null;
+    _error.value = null;
   }
 
   void setData(DataType value) {
@@ -23,13 +23,13 @@ class StateController<ErrorType, DataType> {
   }
 
   void setError(ErrorType error) {
-    _errorMessage.value = error;
+    _error.value = error;
     _state.value = State.error;
   }
 
   void reset() {
     _state.value = State.initial;
-    _errorMessage.value = null;
+    _error.value = null;
     _data.value = null;
   }
 

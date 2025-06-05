@@ -7,14 +7,11 @@ import 'package:healthyways/features/patient/presentation/controllers/patient_co
 class AppPatientController extends GetxController {
   final PatientController _patientController;
 
-  AppPatientController({required PatientController patientController})
-    : _patientController = patientController;
+  AppPatientController({required PatientController patientController}) : _patientController = patientController;
 
   // Getter to expose patient and allPatients directly
-  StateController<Failure, PatientProfile> get patient =>
-      _patientController.patient;
-  StateController<Failure, List<PatientProfile>> get allPatients =>
-      _patientController.allPatients;
+  StateController<Failure, PatientProfile> get patient => _patientController.patient;
+  StateController<Failure, List<PatientProfile>> get allPatients => _patientController.allPatients;
 
   Future<void> getPatientById(String uid) async {
     await _patientController.getPatientById(uid);

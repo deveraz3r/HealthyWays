@@ -1,7 +1,7 @@
 import 'package:healthyways/core/common/custom_types/visibility.dart';
 
 class MyMeasurements {
-  String id;
+  String id; //forign key to preset Measurements
   Visibility visiblity;
   bool isActive;
 

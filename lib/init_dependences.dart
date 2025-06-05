@@ -17,6 +17,15 @@ import 'package:healthyways/features/doctor/domain/usecases/get_all_doctors.dart
 import 'package:healthyways/features/doctor/domain/usecases/get_doctor_by_id.dart';
 import 'package:healthyways/features/doctor/domain/usecases/update_doctor_profile.dart';
 import 'package:healthyways/features/doctor/presentation/controllers/doctor_controller.dart';
+import 'package:healthyways/features/measurements/data/datasources/measurement_remote_data_source.dart';
+import 'package:healthyways/features/measurements/data/repositories/measurement_repository_impl.dart';
+import 'package:healthyways/features/measurements/domain/repositories/measurement_repository.dart';
+import 'package:healthyways/features/measurements/domain/usecases/add_measurement_entry.dart';
+import 'package:healthyways/features/measurements/domain/usecases/get_all_measurements.dart';
+import 'package:healthyways/features/measurements/domain/usecases/get_measurement_entries.dart';
+import 'package:healthyways/features/measurements/domain/usecases/get_my_measurement.dart';
+import 'package:healthyways/features/measurements/domain/usecases/toggle_my_measurement_status.dart';
+import 'package:healthyways/features/measurements/presentation/controllers/measurement_controller.dart';
 import 'package:healthyways/features/medication/data/datasources/dummy_remote_data_source_impl.dart';
 import 'package:healthyways/features/medication/data/datasources/medications_remote_data_source.dart';
 import 'package:healthyways/features/medication/data/repositories/medication_repository_impl.dart';
@@ -71,6 +80,7 @@ Future<void> initDependencies() async {
   _initPatient();
   _initMedications();
   _initUpdates();
+  _initMeasurements();
   // _initDoctor();
   // _initPharmacist();
 }
@@ -82,24 +92,14 @@ void _initAuth() {
   );
 
   // Repositories
-  serviceLocator.registerFactory<AuthRepository>(
-    () => AuthRepositoryImpl(serviceLocator<AuthRemoteDataSource>()),
-  );
+  serviceLocator.registerFactory<AuthRepository>(() => AuthRepositoryImpl(serviceLocator<AuthRemoteDataSource>()));
 
   // Use cases
   serviceLocator
-    ..registerFactory<UserSignIn>(
-      () => UserSignIn(serviceLocator<AuthRepository>()),
-    )
-    ..registerFactory<UserSignUp>(
-      () => UserSignUp(serviceLocator<AuthRepository>()),
-    )
-    ..registerFactory<UserSignOut>(
-      () => UserSignOut(serviceLocator<AuthRepository>()),
-    )
-    ..registerFactory<CurrentProfile>(
-      () => CurrentProfile(serviceLocator<AuthRepository>()),
-    );
+    ..registerFactory<UserSignIn>(() => UserSignIn(serviceLocator<AuthRepository>()))
+    ..registerFactory<UserSignUp>(() => UserSignUp(serviceLocator<AuthRepository>()))
+    ..registerFactory<UserSignOut>(() => UserSignOut(serviceLocator<AuthRepository>()))
+    ..registerFactory<CurrentProfile>(() => CurrentProfile(serviceLocator<AuthRepository>()));
 
   // App level controller
   serviceLocator.registerLazySingleton(() => AppProfileController());
@@ -129,15 +129,9 @@ void _initPatient() {
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllPatients>(
-      () => GetAllPatients(serviceLocator<PatientRepository>()),
-    )
-    ..registerFactory<GetPatientById>(
-      () => GetPatientById(serviceLocator<PatientRepository>()),
-    )
-    ..registerFactory<UpdatePatientProfile>(
-      () => UpdatePatientProfile(serviceLocator<PatientRepository>()),
-    );
+    ..registerFactory<GetAllPatients>(() => GetAllPatients(serviceLocator<PatientRepository>()))
+    ..registerFactory<GetPatientById>(() => GetPatientById(serviceLocator<PatientRepository>()))
+    ..registerFactory<UpdatePatientProfile>(() => UpdatePatientProfile(serviceLocator<PatientRepository>()));
 
   // Controller
   serviceLocator.registerSingleton<PatientController>(
@@ -150,9 +144,7 @@ void _initPatient() {
 
   // App-level controller
   serviceLocator.registerSingleton<AppPatientController>(
-    AppPatientController(
-      patientController: serviceLocator<PatientController>(),
-    ),
+    AppPatientController(patientController: serviceLocator<PatientController>()),
   );
 }
 
@@ -165,18 +157,13 @@ void _initMedications() {
 
   // Repositories
   serviceLocator.registerFactory<MedicationRepository>(
-    () =>
-        MedicationRepositoryImpl(serviceLocator<MedicationsRemoteDataSource>()),
+    () => MedicationRepositoryImpl(serviceLocator<MedicationsRemoteDataSource>()),
   );
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllMedicines>(
-      () => GetAllMedicines(serviceLocator<MedicationRepository>()),
-    )
-    ..registerFactory<GetAllMedications>(
-      () => GetAllMedications(serviceLocator<MedicationRepository>()),
-    )
+    ..registerFactory<GetAllMedicines>(() => GetAllMedicines(serviceLocator<MedicationRepository>()))
+    ..registerFactory<GetAllMedications>(() => GetAllMedications(serviceLocator<MedicationRepository>()))
     ..registerFactory<ToggleMedicationStatusById>(
       () => ToggleMedicationStatusById(serviceLocator<MedicationRepository>()),
     );
@@ -190,6 +177,39 @@ void _initMedications() {
       getAllMedicines: serviceLocator<GetAllMedicines>(),
       getAllMedications: serviceLocator<GetAllMedications>(),
       toggleMedicationStatusById: serviceLocator<ToggleMedicationStatusById>(),
+    ),
+  );
+}
+
+void _initMeasurements() {
+  // Data sources
+  serviceLocator.registerFactory<MeasurementRemoteDataSource>(
+    () => MeasurementRemoteDataSourceImpl(serviceLocator<SupabaseClient>(), serviceLocator<AppProfileController>()),
+  );
+
+  // Repositories
+  serviceLocator.registerFactory<MeasurementRepository>(
+    () => MeasurementRepositoryImpl(serviceLocator<MeasurementRemoteDataSource>()),
+  );
+
+  // Use cases
+  serviceLocator
+    ..registerFactory<GetAllMeasurements>(() => GetAllMeasurements(serviceLocator<MeasurementRepository>()))
+    ..registerFactory<GetMyMeasurements>(() => GetMyMeasurements(serviceLocator<MeasurementRepository>()))
+    ..registerFactory<GetMeasurementEntries>(() => GetMeasurementEntries(serviceLocator<MeasurementRepository>()))
+    ..registerFactory<AddMeasurementEntry>(() => AddMeasurementEntry(serviceLocator<MeasurementRepository>()))
+    ..registerFactory<ToggleMyMeasurementStatus>(
+      () => ToggleMyMeasurementStatus(serviceLocator<MeasurementRepository>()),
+    );
+
+  // Controller
+  serviceLocator.registerSingleton<MeasurementController>(
+    MeasurementController(
+      getAllMeasurements: serviceLocator<GetAllMeasurements>(),
+      getMyMeasurements: serviceLocator<GetMyMeasurements>(),
+      getMeasurementEntries: serviceLocator<GetMeasurementEntries>(),
+      toggleMyMeasurementStatus: serviceLocator<ToggleMyMeasurementStatus>(),
+      addMeasurementEntry: serviceLocator<AddMeasurementEntry>(),
     ),
   );
 }
@@ -216,10 +236,7 @@ void _initUpdates() {
 
   // Controller
   serviceLocator.registerSingleton<UpdatesController>(
-    UpdatesController(
-      getAllMedicationScheduleReport:
-          serviceLocator<GetAllMedicationScheduleReport>(),
-    ),
+    UpdatesController(getAllMedicationScheduleReport: serviceLocator<GetAllMedicationScheduleReport>()),
   );
 }
 
@@ -236,15 +253,9 @@ void _initDoctor() {
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllDoctors>(
-      () => GetAllDoctors(serviceLocator<DoctorRepository>()),
-    )
-    ..registerFactory<GetDoctorById>(
-      () => GetDoctorById(serviceLocator<DoctorRepository>()),
-    )
-    ..registerFactory<UpdateDoctorProfile>(
-      () => UpdateDoctorProfile(serviceLocator<DoctorRepository>()),
-    );
+    ..registerFactory<GetAllDoctors>(() => GetAllDoctors(serviceLocator<DoctorRepository>()))
+    ..registerFactory<GetDoctorById>(() => GetDoctorById(serviceLocator<DoctorRepository>()))
+    ..registerFactory<UpdateDoctorProfile>(() => UpdateDoctorProfile(serviceLocator<DoctorRepository>()));
 
   // Controller
   serviceLocator.registerSingleton<DoctorController>(
@@ -264,21 +275,14 @@ void _initPharmacist() {
 
   // Repositories
   serviceLocator.registerFactory<PharmacistRepository>(
-    () =>
-        PharmacistRepositoryImpl(serviceLocator<PharmacistRemoteDataSource>()),
+    () => PharmacistRepositoryImpl(serviceLocator<PharmacistRemoteDataSource>()),
   );
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllPharmacists>(
-      () => GetAllPharmacists(serviceLocator<PharmacistRepository>()),
-    )
-    ..registerFactory<GetPharmacistById>(
-      () => GetPharmacistById(serviceLocator<PharmacistRepository>()),
-    )
-    ..registerFactory<UpdatePharmacistProfile>(
-      () => UpdatePharmacistProfile(serviceLocator<PharmacistRepository>()),
-    );
+    ..registerFactory<GetAllPharmacists>(() => GetAllPharmacists(serviceLocator<PharmacistRepository>()))
+    ..registerFactory<GetPharmacistById>(() => GetPharmacistById(serviceLocator<PharmacistRepository>()))
+    ..registerFactory<UpdatePharmacistProfile>(() => UpdatePharmacistProfile(serviceLocator<PharmacistRepository>()));
 
   // Controller
   serviceLocator.registerSingleton<PharmacistController>(

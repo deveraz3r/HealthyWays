@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/features/measurements/presentation/pages/my_measurements_page.dart';
 import 'package:healthyways/features/medication/presentation/pages/add_new_medication_page.dart';
 
 class PatientMorePage extends StatelessWidget {
@@ -25,10 +26,11 @@ class PatientMorePage extends StatelessWidget {
         },
       },
       {
-        'title': 'Measurements',
+        'title': 'Trackers',
         'icon': Icons.monitor_heart,
         'onTap': () {
           print("Measurements tapped");
+          Navigator.push(context, MyMeasurementsPage.route());
         },
       },
       {

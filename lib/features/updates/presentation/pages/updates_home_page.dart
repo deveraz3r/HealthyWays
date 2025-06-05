@@ -5,8 +5,7 @@ import 'package:healthyways/features/updates/presentation/widgets/medication_sch
 import 'package:healthyways/init_dependences.dart';
 
 class UpdatesHomePage extends StatefulWidget {
-  static route() =>
-      MaterialPageRoute(builder: (context) => const UpdatesHomePage());
+  static route() => MaterialPageRoute(builder: (context) => const UpdatesHomePage());
   const UpdatesHomePage({super.key});
 
   @override
@@ -14,9 +13,7 @@ class UpdatesHomePage extends StatefulWidget {
 }
 
 class _UpdatesHomePageState extends State<UpdatesHomePage> {
-  final UpdatesController updatesController = Get.put(
-    serviceLocator<UpdatesController>(),
-  );
+  final UpdatesController updatesController = Get.put(serviceLocator<UpdatesController>());
 
   @override
   void initState() {
@@ -35,14 +32,13 @@ class _UpdatesHomePageState extends State<UpdatesHomePage> {
         if (updatesController.allMedicationScheduleReport.hasError) {
           return Center(
             child: Text(
-              'Error: ${updatesController.allMedicationScheduleReport.errorMessage}',
+              'Error: ${updatesController.allMedicationScheduleReport.error}',
               style: const TextStyle(color: Colors.red),
             ),
           );
         }
 
-        final schedules =
-            updatesController.allMedicationScheduleReport.data ?? [];
+        final schedules = updatesController.allMedicationScheduleReport.data ?? [];
 
         if (schedules.isEmpty) {
           return const Center(child: Text('No updates available'));
