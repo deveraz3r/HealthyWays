@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/medication/presentation/controllers/medication_controller.dart';
-import 'package:healthyways/features/medication/presentation/widgets/medication_card.dart';
+import 'package:healthyways/features/patient/presentation/widgets/medication_card.dart';
 import 'package:healthyways/init_dependences.dart';
 import 'package:intl/intl.dart';
 
 class MedicationsHomePage extends StatefulWidget {
-  static route() =>
-      MaterialPageRoute(builder: (context) => MedicationsHomePage());
+  static route() => MaterialPageRoute(builder: (context) => MedicationsHomePage());
   const MedicationsHomePage({super.key});
 
   @override
@@ -16,9 +15,7 @@ class MedicationsHomePage extends StatefulWidget {
 }
 
 class _MedicationsHomePageState extends State<MedicationsHomePage> {
-  final MedicationController medicationController = Get.put(
-    serviceLocator<MedicationController>(),
-  );
+  final MedicationController medicationController = Get.put(serviceLocator<MedicationController>());
 
   // Add selected date state
   DateTime selectedDate = DateTime.now();
@@ -31,9 +28,7 @@ class _MedicationsHomePageState extends State<MedicationsHomePage> {
   }
 
   // Add these helper methods
-  Map<String, List<dynamic>> _categorizedMedications(
-    List<dynamic> medications,
-  ) {
+  Map<String, List<dynamic>> _categorizedMedications(List<dynamic> medications) {
     return {
       'Morning':
           medications.where((med) {
@@ -79,13 +74,7 @@ class _MedicationsHomePageState extends State<MedicationsHomePage> {
                 color: AppPallete.greyColor,
               ),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -100,7 +89,7 @@ class _MedicationsHomePageState extends State<MedicationsHomePage> {
                 padding: const EdgeInsets.only(right: 16),
                 child: SizedBox(
                   width: 200, // Fixed width for each card
-                  child: MedicationCard(medication: medications[index]),
+                  // child: MedicationCard(medication: medications[index]),
                 ),
               );
             },
@@ -168,60 +157,39 @@ class _MedicationsHomePageState extends State<MedicationsHomePage> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    AppPallete.gradient1.withOpacity(0.2),
-                    AppPallete.backgroundColor2,
-                  ],
+                  colors: [AppPallete.gradient1.withOpacity(0.2), AppPallete.backgroundColor2],
                 ),
                 // color: AppPallete.backgroundColor.withAlpha(
                 //   (0.2 * 255).round(),
                 // ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppPallete.gradient1.withOpacity(0.3),
-                  width: 1,
-                ),
+                border: Border.all(color: AppPallete.gradient1.withOpacity(0.3), width: 1),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Previous day button
-                  IconButton(
-                    onPressed: () => _changeDate(-1),
-                    icon: const Icon(Icons.chevron_left, size: 30),
-                  ),
+                  IconButton(onPressed: () => _changeDate(-1), icon: const Icon(Icons.chevron_left, size: 30)),
                   // Date display
                   Column(
                     children: [
                       Text(
                         DateFormat('EEEE').format(selectedDate),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: AppPallete.greyColor,
-                        ),
+                        style: const TextStyle(fontSize: 16, color: AppPallete.greyColor),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         DateFormat('d').format(selectedDate),
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                       ),
                       Text(
                         DateFormat('MMMM yyyy').format(selectedDate),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: AppPallete.greyColor,
-                        ),
+                        style: const TextStyle(fontSize: 16, color: AppPallete.greyColor),
                       ),
                     ],
                   ),
                   // Next day button
-                  IconButton(
-                    onPressed: () => _changeDate(1),
-                    icon: const Icon(Icons.chevron_right, size: 30),
-                  ),
+                  IconButton(onPressed: () => _changeDate(1), icon: const Icon(Icons.chevron_right, size: 30)),
                 ],
               ),
             ),
@@ -234,18 +202,9 @@ class _MedicationsHomePageState extends State<MedicationsHomePage> {
                     ? const Center(child: Text('No medications for today.'))
                     : ListView(
                       children: [
-                        _buildTimeSection(
-                          'Morning',
-                          categorizedMeds['Morning']!,
-                        ),
-                        _buildTimeSection(
-                          'Afternoon',
-                          categorizedMeds['Afternoon']!,
-                        ),
-                        _buildTimeSection(
-                          'Evening',
-                          categorizedMeds['Evening']!,
-                        ),
+                        _buildTimeSection('Morning', categorizedMeds['Morning']!),
+                        _buildTimeSection('Afternoon', categorizedMeds['Afternoon']!),
+                        _buildTimeSection('Evening', categorizedMeds['Evening']!),
                         _buildTimeSection('Night', categorizedMeds['Night']!),
                       ],
                     ),

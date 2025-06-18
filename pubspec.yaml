@@ -22,6 +22,8 @@ dependencies:
   get_it: ^8.0.3
   intl: ^0.20.2
   uuid: ^4.5.1
+  dropdown_search: ^5.0.6
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

@@ -5,6 +5,10 @@ class MyMeasurementsModel extends MyMeasurements {
     required super.id,
     required super.visiblity,
     required super.isActive,
+    required super.time,
+    required super.repetitionType,
+    required super.customDates,
+    required super.weekdays,
   });
 
   //tojson

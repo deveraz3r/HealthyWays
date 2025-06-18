@@ -21,25 +21,36 @@ import 'package:healthyways/features/measurements/data/datasources/measurement_r
 import 'package:healthyways/features/measurements/data/repositories/measurement_repository_impl.dart';
 import 'package:healthyways/features/measurements/domain/repositories/measurement_repository.dart';
 import 'package:healthyways/features/measurements/domain/usecases/add_measurement_entry.dart';
+import 'package:healthyways/features/patient/domain/usecases/add_measurement_entry.dart' as patient;
 import 'package:healthyways/features/measurements/domain/usecases/get_all_measurements.dart';
 import 'package:healthyways/features/measurements/domain/usecases/get_measurement_entries.dart';
+import 'package:healthyways/features/measurements/domain/usecases/get_measurement_visibility.dart';
 import 'package:healthyways/features/measurements/domain/usecases/get_my_measurement.dart';
 import 'package:healthyways/features/measurements/domain/usecases/toggle_my_measurement_status.dart';
+import 'package:healthyways/features/measurements/domain/usecases/update_measurement_visibility.dart';
+import 'package:healthyways/features/measurements/domain/usecases/update_my_measurement_reminder_settings.dart';
 import 'package:healthyways/features/measurements/presentation/controllers/measurement_controller.dart';
-import 'package:healthyways/features/medication/data/datasources/dummy_remote_data_source_impl.dart';
+import 'package:healthyways/features/medication/data/datasources/medications_remote_data_source_impl.dart';
 import 'package:healthyways/features/medication/data/datasources/medications_remote_data_source.dart';
 import 'package:healthyways/features/medication/data/repositories/medication_repository_impl.dart';
 import 'package:healthyways/features/medication/domain/repositories/medication_repository.dart';
+import 'package:healthyways/features/medication/domain/usecases/add_assigned_medication.dart';
 import 'package:healthyways/features/medication/domain/usecases/get_all_medications.dart';
 import 'package:healthyways/features/medication/domain/usecases/get_all_medicines.dart';
+import 'package:healthyways/features/medication/domain/usecases/get_medicine_by_id.dart';
 import 'package:healthyways/features/medication/domain/usecases/toggle_medication_status_by_id.dart';
 import 'package:healthyways/features/medication/presentation/controllers/medication_controller.dart';
 import 'package:healthyways/features/patient/data/datasources/patient_remote_data_source.dart';
 import 'package:healthyways/features/patient/data/repositories/patient_repository_impl.dart';
 import 'package:healthyways/features/patient/domain/repositories/patient_repository.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_all_patients.dart';
+import 'package:healthyways/features/patient/domain/usecases/get_medicine_by_id.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_patient_by_id.dart';
+import 'package:healthyways/features/patient/domain/usecases/patient_get_all_medications.dart';
+import 'package:healthyways/features/patient/domain/usecases/patient_get_measurement_entries.dart';
+import 'package:healthyways/features/patient/domain/usecases/toggle_medication_status_by_id.dart';
 import 'package:healthyways/features/patient/domain/usecases/update_patient_profile.dart';
+import 'package:healthyways/features/patient/domain/usecases/update_visibility_settings.dart';
 import 'package:healthyways/features/patient/presentation/controllers/patient_controller.dart';
 import 'package:healthyways/features/pharmacist/data/datasources/pharmacist_remote_data_source.dart';
 import 'package:healthyways/features/pharmacist/data/repositores/pharmacist_profile_repository_impl.dart';
@@ -70,10 +81,6 @@ Future<void> initDependencies() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
   serviceLocator.registerSingleton<SupabaseClient>(supabase.client);
-
-  //TODO: remove after adding valid datasource
-  Get.lazyPut<DummyMedicationSource>(() => DummyMedicationSource());
-  Get.lazyPut<UpdatesDummyController>(() => UpdatesDummyController());
 
   // Initialize feature-specific dependencies
   _initAuth();
@@ -119,7 +126,10 @@ void _initAuth() {
 void _initPatient() {
   // Data sources
   serviceLocator.registerFactory<PatientRemoteDataSource>(
-    () => PatientRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+    () => PatientRemoteDataSourceImpl(
+      supabaseClient: serviceLocator<SupabaseClient>(),
+      appProfileController: serviceLocator<AppProfileController>(),
+    ),
   );
 
   // Repositories
@@ -131,7 +141,20 @@ void _initPatient() {
   serviceLocator
     ..registerFactory<GetAllPatients>(() => GetAllPatients(serviceLocator<PatientRepository>()))
     ..registerFactory<GetPatientById>(() => GetPatientById(serviceLocator<PatientRepository>()))
-    ..registerFactory<UpdatePatientProfile>(() => UpdatePatientProfile(serviceLocator<PatientRepository>()));
+    ..registerFactory<UpdatePatientProfile>(() => UpdatePatientProfile(serviceLocator<PatientRepository>()))
+    // ..registerFactory<UpdateGlobalVisibility>(() => UpdateGlobalVisibility(serviceLocator<PatientRepository>()))
+    ..registerFactory<PatientGetAllMedications>(() => PatientGetAllMedications(serviceLocator<PatientRepository>()))
+    ..registerFactory<UpdateVisibilitySettings>(() => UpdateVisibilitySettings(serviceLocator<PatientRepository>()))
+    ..registerFactory<patient.AddMeasurementEntry>(
+      () => patient.AddMeasurementEntry(serviceLocator<PatientRepository>()),
+    )
+    ..registerFactory<PatientGetMedicineById>(() => PatientGetMedicineById(serviceLocator<PatientRepository>()))
+    ..registerFactory<PatientToggleMedicationStatusById>(
+      () => PatientToggleMedicationStatusById(serviceLocator<PatientRepository>()),
+    )
+    ..registerFactory<PatientGetMeasurementEntries>(
+      () => PatientGetMeasurementEntries(serviceLocator<PatientRepository>()),
+    );
 
   // Controller
   serviceLocator.registerSingleton<PatientController>(
@@ -139,6 +162,13 @@ void _initPatient() {
       getAllPatients: serviceLocator<GetAllPatients>(),
       getPatientById: serviceLocator<GetPatientById>(),
       updatePatientProfile: serviceLocator<UpdatePatientProfile>(),
+      // updateGlobalVisibility: serviceLocator<UpdateGlobalVisibility>(),
+      updateVisibilitySettings: serviceLocator<UpdateVisibilitySettings>(),
+      getAllMedications: serviceLocator<PatientGetAllMedications>(),
+      addMeasurementEntry: serviceLocator<patient.AddMeasurementEntry>(),
+      getMedicineById: serviceLocator<PatientGetMedicineById>(),
+      toggleMedicationStatusById: serviceLocator<PatientToggleMedicationStatusById>(),
+      patientGetMeasurementEntries: serviceLocator<PatientGetMeasurementEntries>(),
     ),
   );
 
@@ -151,7 +181,7 @@ void _initPatient() {
 void _initMedications() {
   // Data sources
   serviceLocator.registerFactory<MedicationsRemoteDataSource>(
-    () => MedicationsDummyRemoteDataSourceImpl(),
+    () => MedicationsRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
     //TODO: replace with actual Datasource
   );
 
@@ -164,9 +194,11 @@ void _initMedications() {
   serviceLocator
     ..registerFactory<GetAllMedicines>(() => GetAllMedicines(serviceLocator<MedicationRepository>()))
     ..registerFactory<GetAllMedications>(() => GetAllMedications(serviceLocator<MedicationRepository>()))
+    ..registerFactory<AddAssignedMedication>(() => AddAssignedMedication(serviceLocator<MedicationRepository>()))
     ..registerFactory<ToggleMedicationStatusById>(
       () => ToggleMedicationStatusById(serviceLocator<MedicationRepository>()),
-    );
+    )
+    ..registerFactory<GetMedicineById>(() => GetMedicineById(serviceLocator<MedicationRepository>()));
 
   // App-level controller
   serviceLocator.registerSingleton(() => AppMedicationsController());
@@ -177,6 +209,7 @@ void _initMedications() {
       getAllMedicines: serviceLocator<GetAllMedicines>(),
       getAllMedications: serviceLocator<GetAllMedications>(),
       toggleMedicationStatusById: serviceLocator<ToggleMedicationStatusById>(),
+      addAssignedMedication: serviceLocator<AddAssignedMedication>(),
     ),
   );
 }
@@ -198,6 +231,13 @@ void _initMeasurements() {
     ..registerFactory<GetMyMeasurements>(() => GetMyMeasurements(serviceLocator<MeasurementRepository>()))
     ..registerFactory<GetMeasurementEntries>(() => GetMeasurementEntries(serviceLocator<MeasurementRepository>()))
     ..registerFactory<AddMeasurementEntry>(() => AddMeasurementEntry(serviceLocator<MeasurementRepository>()))
+    ..registerFactory<GetMeasurementVisibility>(() => GetMeasurementVisibility(serviceLocator<MeasurementRepository>()))
+    ..registerFactory<UpdateMeasurementVisibility>(
+      () => UpdateMeasurementVisibility(serviceLocator<MeasurementRepository>()),
+    )
+    ..registerFactory<UpdateMyMeasurementReminderSettings>(
+      () => UpdateMyMeasurementReminderSettings(serviceLocator<MeasurementRepository>()),
+    )
     ..registerFactory<ToggleMyMeasurementStatus>(
       () => ToggleMyMeasurementStatus(serviceLocator<MeasurementRepository>()),
     );
@@ -210,6 +250,10 @@ void _initMeasurements() {
       getMeasurementEntries: serviceLocator<GetMeasurementEntries>(),
       toggleMyMeasurementStatus: serviceLocator<ToggleMyMeasurementStatus>(),
       addMeasurementEntry: serviceLocator<AddMeasurementEntry>(),
+      getMeasurementVisibility: serviceLocator<GetMeasurementVisibility>(),
+      updateMeasurementVisibility: serviceLocator<UpdateMeasurementVisibility>(),
+      appProfileController: serviceLocator<AppProfileController>(),
+      updateMyMeasurementReminderSettings: serviceLocator<UpdateMyMeasurementReminderSettings>(),
     ),
   );
 }
@@ -217,8 +261,7 @@ void _initMeasurements() {
 void _initUpdates() {
   // Data sources
   serviceLocator.registerFactory<IUpdatesRemoteDataSource>(
-    () => UpdatesDummyDataSource(),
-    //TODO: replace with actual Datasource
+    () => UpdatesRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
   );
 
   // Repositories
@@ -236,7 +279,11 @@ void _initUpdates() {
 
   // Controller
   serviceLocator.registerSingleton<UpdatesController>(
-    UpdatesController(getAllMedicationScheduleReport: serviceLocator<GetAllMedicationScheduleReport>()),
+    UpdatesController(
+      getAllMedicationScheduleReport: serviceLocator<GetAllMedicationScheduleReport>(),
+      getPatientById: serviceLocator<GetPatientById>(),
+      getMedicineById: serviceLocator<GetMedicineById>(),
+    ),
   );
 }
 

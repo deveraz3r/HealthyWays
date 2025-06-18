@@ -1,6 +1,6 @@
 import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/common/entites/profile.dart';
-import 'package:healthyways/core/constants/supabase_tables.dart';
+import 'package:healthyways/core/constants/supabase/supabase_tables.dart';
 import 'package:healthyways/core/error/exceptions.dart';
 import 'package:healthyways/features/auth/data/factories/profile_factory.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,10 +10,7 @@ abstract interface class AuthRemoteDataSource {
 
   Future<Profile?> getCurrentUserData();
 
-  Future<Profile> signInWithEmailAndPassword({
-    required String email,
-    required String password,
-  });
+  Future<Profile> signInWithEmailAndPassword({required String email, required String password});
 
   Future<Profile> signUpWithEmailAndPassword({
     required String fName,
@@ -53,11 +50,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // Based on role, fetch complete profile from appropriate view
       final response =
-          await supabaseClient
-              .from(_getViewName(role))
-              .select()
-              .eq("uid", currentUserSession!.user.id)
-              .single();
+          await supabaseClient.from(_getViewName(role)).select().eq("uid", currentUserSession!.user.id).single();
 
       return ProfileFactory.createProfileFromJson(response);
     } catch (e) {
@@ -79,15 +72,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Profile> signInWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
+  Future<Profile> signInWithEmailAndPassword({required String email, required String password}) async {
     try {
-      final response = await supabaseClient.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+      final response = await supabaseClient.auth.signInWithPassword(email: email, password: password);
 
       if (response.user == null) {
         throw ServerException("User is null");
@@ -114,12 +101,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await supabaseClient.auth.signUp(
         email: email,
         password: password,
-        data: {
-          "fName": fName,
-          "lName": lName,
-          "gender": gender,
-          "selectedRole": selectedRole ?? "patient",
-        },
+        data: {"fName": fName, "lName": lName, "gender": gender, "selectedRole": selectedRole ?? "patient"},
       );
 
       if (response.user == null) {

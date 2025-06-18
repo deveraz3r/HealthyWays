@@ -6,6 +6,8 @@ import 'package:healthyways/core/common/widgets/loader.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/measurements/domain/entites/preset_measurement.dart';
 import 'package:healthyways/features/measurements/presentation/controllers/measurement_controller.dart';
+import 'package:healthyways/features/measurements/presentation/pages/measurement_settings_page.dart';
+import 'package:healthyways/features/measurements/presentation/pages/visibility_details_page.dart';
 import 'package:healthyways/features/measurements/presentation/widgets/measurement_entry_card.dart';
 import 'package:uuid/uuid.dart';
 import 'package:healthyways/features/measurements/domain/entites/measurement_entry.dart';
@@ -75,6 +77,7 @@ class _MeasurementDetailsPageState extends State<MeasurementDetailsPage> {
                     value: value,
                     note: note,
                     lastUpdated: DateTime.now(),
+                    createdAt: DateTime.now(),
                   );
 
                   await _measurementController.addMeasurementEntry(measurementEntry: entry);
@@ -94,18 +97,24 @@ class _MeasurementDetailsPageState extends State<MeasurementDetailsPage> {
       appBar: AppBar(
         title: Text(widget.measurement.title),
         backgroundColor: AppPallete.backgroundColor2,
-        actions: [IconButton(onPressed: _showAddMeasurementEntryDialog, icon: Icon(CupertinoIcons.add_circled))],
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.push(context, MeasurementSettingsPage.route(measurement: widget.measurement)),
+            icon: Icon(Icons.settings),
+          ),
+          IconButton(onPressed: _showAddMeasurementEntryDialog, icon: Icon(CupertinoIcons.add_circled)),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Obx(() {
-          if (_measurementController.measurementEnries.isLoading) {
+          if (_measurementController.measurementEntries.isLoading) {
             return Loader();
-          } else if (_measurementController.measurementEnries.hasData) {
-            return Center(child: Text(_measurementController.measurementEnries.error!.message));
+          } else if (_measurementController.measurementEntries.hasError) {
+            return Center(child: Text(_measurementController.measurementEntries.error!.message));
           }
 
-          final entries = _measurementController.measurementEnries.data ?? [];
+          final entries = _measurementController.measurementEntries.data ?? [];
 
           return entries.isEmpty
               ? Center(child: Text('No entries yet.'))

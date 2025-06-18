@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthyways/features/updates/presentation/controllers/updates_controller.dart';
 import 'package:healthyways/features/updates/presentation/widgets/medication_schedule_report_widget.dart';
+import 'package:healthyways/features/updates/presentation/widgets/schedule_shimmer_card.dart';
 import 'package:healthyways/init_dependences.dart';
 
 class UpdatesHomePage extends StatefulWidget {
-  static route() => MaterialPageRoute(builder: (context) => const UpdatesHomePage());
+  static route() => MaterialPageRoute(builder: (_) => const UpdatesHomePage());
   const UpdatesHomePage({super.key});
 
   @override
@@ -26,7 +27,11 @@ class _UpdatesHomePageState extends State<UpdatesHomePage> {
     return Scaffold(
       body: Obx(() {
         if (updatesController.allMedicationScheduleReport.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: 3, // Show 3 shimmer cards
+            itemBuilder: (_, __) => const Padding(padding: EdgeInsets.only(bottom: 16), child: ScheduleShimmerCard()),
+          );
         }
 
         if (updatesController.allMedicationScheduleReport.hasError) {
@@ -48,7 +53,10 @@ class _UpdatesHomePageState extends State<UpdatesHomePage> {
           padding: const EdgeInsets.all(16),
           itemCount: schedules.length,
           itemBuilder: (context, index) {
-            return MedicationScheduleCard(schedule: schedules[index]);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: MedicationScheduleCard(schedule: schedules[index]),
+            );
           },
         );
       }),

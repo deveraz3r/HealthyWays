@@ -8,11 +8,15 @@ class PatientProfile extends Profile {
   final bool isMarried;
   final List<String> emergencyContacts;
   final List<String> insuranceIds;
+
   final Visibility globalVisibility;
+
   final Visibility allergiesVisibility;
   final Visibility immunizationsVisibility;
   final Visibility labReportsVisibility;
   final Visibility diariesVisibility;
+  final Visibility measurementsVisibility;
+
   final DateTime? createdAt; // Nullable
 
   PatientProfile({
@@ -30,11 +34,15 @@ class PatientProfile extends Profile {
     required this.isMarried,
     required this.emergencyContacts,
     required this.insuranceIds,
+
     required this.globalVisibility,
+
     required this.allergiesVisibility,
     required this.immunizationsVisibility,
     required this.labReportsVisibility,
     required this.diariesVisibility,
+    required this.measurementsVisibility,
+
     this.createdAt,
   });
 }

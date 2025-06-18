@@ -55,7 +55,6 @@ class PatientDrawer extends StatelessWidget {
                   Navigator.push(context, PatientDemographicsPage.route());
                 },
               ),
-              ListTile(leading: const Icon(Icons.verified_user), title: const Text('Insurance'), onTap: () {}),
               ListTile(
                 leading: const Icon(Icons.remove_red_eye),
                 title: const Text('Visiblity'),

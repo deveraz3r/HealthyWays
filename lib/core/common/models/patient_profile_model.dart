@@ -15,14 +15,18 @@ class PatientProfileModel extends PatientProfile {
 
     required super.myMeasurements,
     super.race,
+    super.address,
     required super.isMarried,
     required super.emergencyContacts,
     required super.insuranceIds,
+
     required super.globalVisibility,
+
     required super.allergiesVisibility,
     required super.immunizationsVisibility,
     required super.labReportsVisibility,
     required super.diariesVisibility,
+    required super.measurementsVisibility,
     super.createdAt,
   });
 
@@ -45,18 +49,12 @@ class PatientProfileModel extends PatientProfile {
       emergencyContacts: List<String>.from(json['emergencyContacts'] ?? []),
       insuranceIds: List<String>.from(json['insuranceIds'] ?? []),
       globalVisibility: Visibility.fromJson(json['globalVisibility'] ?? {}),
-      allergiesVisibility: Visibility.fromJson(
-        json['allergiesVisibility'] ?? {},
-      ),
-      immunizationsVisibility: Visibility.fromJson(
-        json['immunizationVisibility'] ?? {},
-      ),
-      labReportsVisibility: Visibility.fromJson(
-        json['labReportsVisibility'] ?? {},
-      ),
-      diariesVisibility: Visibility.fromJson(json['diaryVisibility'] ?? {}),
-      createdAt:
-          json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      allergiesVisibility: Visibility.fromJson(json['allergiesVisibility'] ?? {}),
+      immunizationsVisibility: Visibility.fromJson(json['immunizationVisibility'] ?? {}),
+      labReportsVisibility: Visibility.fromJson(json['labReportsVisibility'] ?? {}),
+      diariesVisibility: Visibility.fromJson(json['diariesVisibility'] ?? {}),
+      measurementsVisibility: Visibility.fromJson(json['measurementsVisibility'] ?? {}),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
     );
   }
 
@@ -79,7 +77,52 @@ class PatientProfileModel extends PatientProfile {
       'immunizationVisibility': immunizationsVisibility.toJson(),
       'labReportsVisibility': labReportsVisibility.toJson(),
       'diaryVisibility': diariesVisibility.toJson(),
+      'measurementsVisibility': measurementsVisibility.toJson(),
       'createdAt': createdAt?.toIso8601String(),
     };
+  }
+
+  PatientProfileModel copyWith({
+    String? uid,
+    String? email,
+    String? fName,
+    String? lName,
+    String? gender,
+    String? preferedLanguage,
+    Role? selectedRole,
+    List<MyMeasurements>? myMeasurements,
+    String? race,
+    bool? isMarried,
+    List<String>? emergencyContacts,
+    List<String>? insuranceIds,
+    Visibility? globalVisibility,
+    Visibility? allergiesVisibility,
+    Visibility? immunizationsVisibility,
+    Visibility? labReportsVisibility,
+    Visibility? diariesVisibility,
+    Visibility? measurementsVisibility,
+    DateTime? createdAt,
+  }) {
+    return PatientProfileModel(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      fName: fName ?? this.fName,
+      lName: lName ?? this.lName,
+      gender: gender ?? this.gender,
+      preferedLanguage: preferedLanguage ?? this.preferedLanguage,
+      selectedRole: selectedRole ?? this.selectedRole,
+      myMeasurements: myMeasurements ?? this.myMeasurements,
+      race: race ?? this.race,
+      isMarried: isMarried ?? this.isMarried,
+      emergencyContacts: emergencyContacts ?? this.emergencyContacts,
+      insuranceIds: insuranceIds ?? this.insuranceIds,
+      globalVisibility: globalVisibility ?? this.globalVisibility,
+      allergiesVisibility: allergiesVisibility ?? this.allergiesVisibility,
+      immunizationsVisibility: immunizationsVisibility ?? this.immunizationsVisibility,
+      labReportsVisibility: labReportsVisibility ?? this.labReportsVisibility,
+      diariesVisibility: diariesVisibility ?? this.diariesVisibility,
+      measurementsVisibility: measurementsVisibility ?? this.measurementsVisibility,
+      createdAt: createdAt ?? this.createdAt,
+    );
   }
 }

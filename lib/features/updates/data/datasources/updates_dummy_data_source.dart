@@ -1,103 +1,59 @@
-import 'package:get/get.dart';
-import 'package:healthyways/core/common/custom_types/shape.dart';
-import 'package:healthyways/core/common/entites/medicine.dart';
+import 'package:healthyways/core/common/entites/assigned_medication_report.dart';
+import 'package:healthyways/core/common/models/assigned_medication_model.dart';
+import 'package:healthyways/core/common/models/medicine_schedule_model.dart';
+import 'package:healthyways/core/constants/supabase/supabase_tables.dart';
 import 'package:healthyways/features/updates/data/datasources/i_updates_remote_data_source.dart';
-import 'package:healthyways/features/updates/data/models/medication_schedule_report_model.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class UpdatesDummyDataSource implements IUpdatesRemoteDataSource {
+class UpdatesRemoteDataSourceImpl implements IUpdatesRemoteDataSource {
+  final SupabaseClient client;
+
+  UpdatesRemoteDataSourceImpl(this.client);
+
   @override
-  Future<List<MedicationScheduleReportModel>>
-  getAllMedicationScheduleReport() async {
-    return Get.find<UpdatesDummyController>().dummyMedicationScheduleReports;
-  }
-}
+  Future<List<AssignedMedicationReport>> getAllMedicationScheduleReport() async {
+    try {
+      // Step 1: Get all assigned medications
+      final assignedResponse = await client
+          .from(SupabaseTables.assignedMedications)
+          .select()
+          .order('startDate', ascending: false);
 
-class UpdatesDummyController extends GetxController {
-  final RxList<MedicationScheduleReportModel> dummyMedicationScheduleReports =
-      <MedicationScheduleReportModel>[
-        MedicationScheduleReportModel(
-          id: '1',
-          medicine: Medicine(
-            id: 'med1',
-            name: 'Paracetamol',
-            dosage: 500,
-            unit: 'mg',
-            shape: Shape(
-              image: 'assets/images/tablet.png',
-              primaryColorHex: '#FF5733',
-              secondryColorHex: '#FFC300',
-            ),
-          ),
-          assignedTo: 'patient123',
-          assignedBy: 'doctor456',
-          assignerRole: 'Physician',
-          quantity: 30,
-          frequency: 'Every 6 hours',
-          endTime: DateTime.now().add(const Duration(days: 30)),
-          isActive: true,
-        ),
-        MedicationScheduleReportModel(
-          id: '2',
-          medicine: Medicine(
-            id: 'med2',
-            name: 'Ibuprofen',
-            dosage: 200,
-            unit: 'mg',
-            shape: Shape(
-              image: 'assets/images/capsule.png',
-              primaryColorHex: '#33A2FF',
-              secondryColorHex: '#33FF57',
-            ),
-          ),
-          assignedTo: 'patient123',
-          assignedBy: 'nurse789',
-          assignerRole: 'Nurse',
-          quantity: 20,
-          frequency: 'Every 8 hours',
-          endTime: DateTime.now().add(const Duration(days: 14)),
-          isActive: true,
-        ),
-        MedicationScheduleReportModel(
-          id: '3',
-          medicine: Medicine(
-            id: 'med3',
-            name: 'Amoxicillin',
-            dosage: 250,
-            unit: 'mg',
-            shape: Shape(
-              image: 'assets/images/capsule.png',
-              primaryColorHex: '#8A33FF',
-              secondryColorHex: null, // No secondary color for this one
-            ),
-          ),
-          assignedTo: 'patient456',
-          assignedBy: 'doctor123',
-          assignerRole: 'Pediatrician',
-          quantity: 40,
-          frequency: 'Twice daily',
-          endTime: DateTime.now().add(const Duration(days: 10)),
-          isActive: false,
-        ),
-        MedicationScheduleReportModel(
-          id: '4',
-          medicine: Medicine(
-            id: 'med4',
-            name: 'Lisinopril',
-            dosage: 10,
-            unit: 'mg',
-            shape: Shape(
-              image: 'assets/images/tablet.png',
-              primaryColorHex: '#FF33A2',
-              secondryColorHex: '#33FFF5',
-            ),
-          ),
-          assignedTo: 'patient789',
-          assignedBy: 'doctor456',
-          assignerRole: 'Cardiologist',
-          quantity: 90,
-          frequency: 'Once daily',
-          endTime: DateTime.now().add(const Duration(days: 90)),
-          isActive: true,
-        ),
-      ].obs;
+      final assignedMedications = List<Map<String, dynamic>>.from(assignedResponse);
+
+      // Step 2: For each assigned medication, fetch its medicine schedules
+      List<AssignedMedicationReportModel> results = [];
+
+      for (final med in assignedMedications) {
+        final assignedId = med['id'] as String;
+
+        // Fetch related medicineSchedules
+        final medicineSchedulesResponse = await client
+            .from(SupabaseTables.medicineSchedules)
+            .select()
+            .eq('assignedMedicationId', assignedId);
+
+        final medicineSchedules = List<Map<String, dynamic>>.from(medicineSchedulesResponse);
+
+        // Parse the medicine schedules
+        final schedules = medicineSchedules.map((json) => MedicineScheduleModel.fromJson(json)).toList();
+
+        // Build the report
+        final report = AssignedMedicationReportModel(
+          id: assignedId,
+          assignedTo: med['assignedTo'],
+          assignedBy: med['assignedBy'],
+          startDate: DateTime.parse(med['startDate']),
+          endDate: DateTime.parse(med['endDate']),
+          medicines: schedules,
+        );
+
+        results.add(report);
+      }
+
+      return results;
+    } catch (e) {
+      throw Exception('Failed to fetch medication schedule reports: $e');
+    }
+  }
 }

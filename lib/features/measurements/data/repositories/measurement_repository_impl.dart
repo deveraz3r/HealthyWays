@@ -1,4 +1,6 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:healthyways/core/common/custom_types/my_measurements.dart';
+import 'package:healthyways/core/common/custom_types/visibility.dart';
 import 'package:healthyways/core/error/exceptions.dart';
 import 'package:healthyways/core/error/failure.dart';
 import 'package:healthyways/features/measurements/data/datasources/measurement_remote_data_source.dart';
@@ -52,8 +54,6 @@ class MeasurementRepositoryImpl implements MeasurementRepository {
     try {
       final response = await dataSource.getMeasurementEntries(patientId: patientId, measurementId: measurementId);
 
-      print("MEasuremetn entries: $response");
-
       return right(response);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -71,9 +71,46 @@ class MeasurementRepositoryImpl implements MeasurementRepository {
         value: measurementEntry.value,
         note: measurementEntry.note,
         lastUpdated: measurementEntry.lastUpdated,
+        createdAt: measurementEntry.createdAt,
       );
 
       await dataSource.addMeasurement(measurementEntry: measurementModel);
+      return right(null);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Visibility>> getMeasurementVisibility({required String measurementId}) async {
+    try {
+      final response = await dataSource.getMeasurementVisibility(measurementId: measurementId);
+
+      return right(response);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateMeasurementVisibility({
+    required String measurementId,
+    required Visibility visibility,
+  }) async {
+    try {
+      await dataSource.updateMeasurementVisibility(measurementId: measurementId, visibility: visibility);
+
+      return right(null);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateMyMeasurementReminderSettings({required MyMeasurements myMeasurement}) async {
+    try {
+      await dataSource.updateMyMeasurementReminderSettings(myMeasurement: myMeasurement);
+
       return right(null);
     } on ServerException catch (e) {
       return left(Failure(e.message));

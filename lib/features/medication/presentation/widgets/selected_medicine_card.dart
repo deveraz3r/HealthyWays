@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:healthyways/core/common/custom_types/repetition_type.dart';
 import 'package:healthyways/core/common/entites/medicine.dart';
-import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/core/common/entites/medicine_schedule.dart';
 import 'package:intl/intl.dart';
 
 class SelectedMedicineCard extends StatefulWidget {
   final Medicine medicine;
   final VoidCallback onRemove;
+  final Function(Medicine, MedicineSchedule) onScheduleChanged;
 
   const SelectedMedicineCard({
     required this.medicine,
     required this.onRemove,
+    required this.onScheduleChanged,
     super.key,
   });
 
@@ -18,290 +21,249 @@ class SelectedMedicineCard extends StatefulWidget {
 }
 
 class _SelectedMedicineCardState extends State<SelectedMedicineCard> {
-  List<_TimeQuantitySlot> slots = [_TimeQuantitySlot()];
-  String? repeatType;
-  List<String> selectedWeekdays = [];
-  List<DateTime> customDates = [];
+  String _repetitionType = 'Daily';
+  List<String> _selectedWeekdays = [];
+  List<DateTime> _customDates = [];
+  List<_TimeQuantitySlot> _slots = [_TimeQuantitySlot()];
+  bool _isExpanded = true;
+
+  void _updateSchedule() {
+    final intakeInstructions =
+        _slots
+            .where((slot) => slot.time != null && slot.quantityController.text.isNotEmpty)
+            .map(
+              (slot) =>
+                  IntakeInstruction(time: slot.time!, quantity: double.tryParse(slot.quantityController.text) ?? 0),
+            )
+            .toList();
+
+    widget.onScheduleChanged(
+      widget.medicine,
+      MedicineSchedule(
+        medicineId: widget.medicine.id,
+        intakeInstruction: intakeInstructions,
+        repetitionType: _getRepetitionTypeEnum(),
+        weekdays: _repetitionType == 'Weekdays' ? _selectedWeekdays : null,
+        customDates: _repetitionType == 'Custom Dates' ? _customDates : null,
+      ),
+    );
+  }
+
+  RepetitionType _getRepetitionTypeEnum() {
+    switch (_repetitionType) {
+      case 'Daily':
+        return RepetitionType.daily;
+      case 'Weekdays':
+        return RepetitionType.weekdays;
+      case 'Custom Dates':
+        return RepetitionType.customDates;
+      default:
+        throw Exception('Invalid repetition type');
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var slot in _slots) {
+      slot.quantityController.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
+      child: ExpansionTile(
+        title: Text(widget.medicine.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        initiallyExpanded: true,
+        onExpansionChanged: (val) => setState(() => _isExpanded = val),
         children: [
-          ExpansionTile(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide.none,
-            ),
-            collapsedShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide.none,
-            ),
-            leading: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Color(
-                  int.parse(
-                    widget.medicine.shape.primaryColorHex.substring(1, 7),
-                    radix: 16,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${widget.medicine.dosage} ${widget.medicine.unit}'),
+                const SizedBox(height: 12),
+
+                DropdownButtonFormField<String>(
+                  value: _repetitionType,
+                  decoration: InputDecoration(
+                    labelText: 'Repeat',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
+                  items:
+                      [
+                        'Daily',
+                        'Weekdays',
+                        'Custom Dates',
+                      ].map((type) => DropdownMenuItem(value: type, child: Text(type))).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _repetitionType = value);
+                      _updateSchedule();
+                    }
+                  },
                 ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.medication, color: Colors.white),
-            ),
-            title: Text(widget.medicine.name),
-            subtitle: Text('${widget.medicine.dosage} ${widget.medicine.unit}'),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Repeat Dropdown
-                    DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        labelText: 'Repeat',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: repeatType,
-                      items:
-                          ['Daily', 'Week Days', 'Custom Dates']
-                              .map(
-                                (e) =>
-                                    DropdownMenuItem(value: e, child: Text(e)),
-                              )
-                              .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          repeatType = value;
-                          selectedWeekdays.clear();
-                          customDates.clear();
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
 
-                    if (repeatType == 'Week Days') _buildWeekdaySelector(),
-                    if (repeatType == 'Custom Dates') _buildCustomDatePicker(),
+                if (_repetitionType == 'Weekdays') ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    children:
+                        ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) {
+                          final isSelected = _selectedWeekdays.contains(day);
+                          return FilterChip(
+                            label: Text(day),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                if (selected) {
+                                  _selectedWeekdays.add(day);
+                                } else {
+                                  _selectedWeekdays.remove(day);
+                                }
+                              });
+                              _updateSchedule();
+                            },
+                          );
+                        }).toList(),
+                  ),
+                ],
 
-                    const SizedBox(height: 24),
+                if (_repetitionType == 'Custom Dates') ...[
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (date != null && !_customDates.contains(date)) {
+                        setState(() => _customDates.add(date));
+                        _updateSchedule();
+                      }
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Date'),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children:
+                        _customDates
+                            .map(
+                              (date) => Chip(
+                                label: Text(DateFormat('MMM d').format(date)),
+                                onDeleted: () {
+                                  setState(() => _customDates.remove(date));
+                                  _updateSchedule();
+                                },
+                              ),
+                            )
+                            .toList(),
+                  ),
+                ],
 
-                    // Dosage Schedule Header
-                    Row(
-                      children: [
-                        const Text(
-                          'Dosage Schedule',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.add,
-                          size: 18,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
+                const SizedBox(height: 16),
+                const Text('Time & Quantity', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
 
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: slots.length,
-                      itemBuilder: (context, index) {
-                        final slot = slots[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: AppPallete.backgroundColor2,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                Column(
+                  children: List.generate(_slots.length, (index) {
+                    final slot = _slots[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
                           child: Row(
                             children: [
                               Expanded(
-                                child: TextFormField(
-                                  controller: slot.quantityController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    // labelText: 'Quantity',
-                                    hintText: "Quantity",
-                                    border: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Colors.grey.shade400,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
+                                flex: 2,
                                 child: InkWell(
                                   onTap: () async {
-                                    final picked = await showTimePicker(
+                                    final pickedTime = await showTimePicker(
                                       context: context,
                                       initialTime: slot.time ?? TimeOfDay.now(),
                                     );
-                                    if (picked != null) {
-                                      setState(() {
-                                        slot.time = picked;
-                                      });
+                                    if (pickedTime != null) {
+                                      setState(() => slot.time = pickedTime);
+                                      _updateSchedule();
                                     }
                                   },
                                   child: InputDecorator(
-                                    decoration: InputDecoration(
-                                      // labelText: 'Time',
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Colors.grey.shade400,
-                                        ),
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 22,
-                                          ),
-                                    ),
+                                    decoration: const InputDecoration(labelText: 'Time', border: OutlineInputBorder()),
                                     child: Text(
-                                      slot.time != null
-                                          ? slot.time!.format(context)
-                                          : 'Time of Day',
+                                      slot.time != null ? slot.time!.format(context) : 'Select time',
                                       style: TextStyle(
-                                        color:
-                                            slot.time != null
-                                                ? Theme.of(
-                                                  context,
-                                                ).textTheme.bodyLarge?.color
-                                                : Colors.grey.shade500,
+                                        fontSize: 14,
+                                        color: slot.time != null ? Colors.white : Colors.grey.shade500,
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                              if (slots.length > 1)
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller: slot.quantityController,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  decoration: const InputDecoration(
+                                    labelText: 'Quantity',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (_) => _updateSchedule(),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              if (_slots.length > 1)
                                 IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
+                                  icon: const Icon(Icons.remove_circle, color: Colors.grey),
                                   onPressed: () {
-                                    setState(() {
-                                      slots.removeAt(index);
-                                    });
+                                    setState(() => _slots.removeAt(index));
+                                    _updateSchedule();
                                   },
                                 ),
                             ],
                           ),
-                        );
-                      },
-                    ),
-
-                    // Add Slot Button
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            slots.add(_TimeQuantitySlot());
-                          });
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add Slot'),
-                      ),
-                    ),
-
-                    // Remove Section
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: widget.onRemove,
-                        icon: const Icon(
-                          Icons.delete,
-                          color: AppPallete.greyColor,
-                        ),
-                        label: const Text(
-                          'Remove',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppPallete.greyColor,
-                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    );
+                  }),
                 ),
-              ),
-            ],
+
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      setState(() => _slots.add(_TimeQuantitySlot()));
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Slot'),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: widget.onRemove,
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    label: const Text('Remove', style: TextStyle(color: Colors.red)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildWeekdaySelector() {
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return Wrap(
-      spacing: 8,
-      children:
-          days.map((day) {
-            final selected = selectedWeekdays.contains(day);
-            return FilterChip(
-              label: Text(day),
-              selected: selected,
-              onSelected: (bool value) {
-                setState(() {
-                  if (value) {
-                    selectedWeekdays.add(day);
-                  } else {
-                    selectedWeekdays.remove(day);
-                  }
-                });
-              },
-            );
-          }).toList(),
-    );
-  }
-
-  Widget _buildCustomDatePicker() {
-    return Column(
-      children: [
-        ...customDates.map((date) {
-          return ListTile(
-            title: Text(DateFormat.yMMMMd().format(date)),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                setState(() {
-                  customDates.remove(date);
-                });
-              },
-            ),
-          );
-        }),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            icon: const Icon(Icons.add),
-            label: const Text("Add Date"),
-            onPressed: () async {
-              final date = await showDatePicker(
-                context: context,
-                firstDate: DateTime.now(),
-                lastDate: DateTime.now().add(const Duration(days: 365)),
-                initialDate: DateTime.now(),
-              );
-              if (date != null && !customDates.contains(date)) {
-                setState(() {
-                  customDates.add(date);
-                });
-              }
-            },
-          ),
-        ),
-      ],
     );
   }
 }

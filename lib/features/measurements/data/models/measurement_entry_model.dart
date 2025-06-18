@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:healthyways/features/measurements/domain/entites/measurement_entry.dart';
 
 class MeasurementEntryModel extends MeasurementEntry {
@@ -9,6 +10,7 @@ class MeasurementEntryModel extends MeasurementEntry {
     required super.value,
     required super.note,
     required super.lastUpdated,
+    required super.createdAt,
   });
 
   Map<String, dynamic> toMap() {
@@ -18,7 +20,8 @@ class MeasurementEntryModel extends MeasurementEntry {
       'patientId': patientId,
       'value': value,
       'note': note,
-      'lastUpdated': lastUpdated.millisecondsSinceEpoch,
+      'lastUpdated': lastUpdated.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 
@@ -29,16 +32,13 @@ class MeasurementEntryModel extends MeasurementEntry {
       patientId: map['patientId'] as String,
       value: map['value'] as String,
       note: map['note'] as String,
-      lastUpdated: DateTime.fromMillisecondsSinceEpoch(
-        map['lastUpdated'] as int,
-      ),
+      lastUpdated: DateTime.parse(map['lastUpdated']),
+      createdAt: DateTime.parse(map['createdAt']),
     );
   }
 
   String toJson() => json.encode(toMap());
 
   factory MeasurementEntryModel.fromJson(String source) =>
-      MeasurementEntryModel.fromMap(
-        json.decode(source) as Map<String, dynamic>,
-      );
+      MeasurementEntryModel.fromMap(json.decode(source) as Map<String, dynamic>);
 }

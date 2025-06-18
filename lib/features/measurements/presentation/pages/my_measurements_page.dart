@@ -31,9 +31,7 @@ class _MyMeasurementsPageState extends State<MyMeasurementsPage> {
         title: const Text("My Trackers"),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.push(context, AddMeasurementPage.route());
-            },
+            onPressed: () => Navigator.push(context, AddMeasurementPage.route()),
             icon: const Icon(CupertinoIcons.add_circled),
           ),
         ],

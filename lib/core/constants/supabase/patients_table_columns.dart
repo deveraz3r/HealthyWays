@@ -1,0 +1,15 @@
+enum PatientsTableColumns {
+  uid,
+  myMeasurements,
+  race,
+  isMarried,
+  emergencyContacts,
+  insuranceIds,
+  globalVisibility,
+  allergiesVisibility,
+  immunizationVisibility,
+  labReportsVisibility,
+  diaryVisibility,
+  createdAt,
+  measurementsVisibility,
+}

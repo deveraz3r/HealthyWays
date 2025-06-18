@@ -4,8 +4,8 @@ class MeasurementEntry {
   String patientId;
   String value;
   String note;
-  // DateTime createdAt; //not included on client side
   DateTime lastUpdated;
+  DateTime createdAt; //not included on client side
 
   MeasurementEntry({
     required this.id,
@@ -14,5 +14,6 @@ class MeasurementEntry {
     required this.value,
     required this.note,
     required this.lastUpdated,
+    required this.createdAt,
   });
 }
