@@ -18,4 +18,8 @@ class SupabaseTables {
   static String medicationsTable = 'medications';
   static String assignedMedications = "assignedMedications";
   static String medicineSchedules = "medicineSchedules";
+
+  //Diary
+  static String diaryTable = "diaries";
+  static String immunizationTable = "immunizations";
 }

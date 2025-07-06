@@ -16,5 +16,5 @@ class DeleteDiaryEntry implements UseCase<void, DeleteDiaryEntryParams> {
 class DeleteDiaryEntryParams {
   String id;
 
-  DeleteDiaryEntryParams(this.id);
+  DeleteDiaryEntryParams({required this.id});
 }

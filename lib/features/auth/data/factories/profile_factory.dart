@@ -1,7 +1,7 @@
 import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/common/entites/profile.dart';
 import 'package:healthyways/features/auth/data/models/profile_model.dart';
-import 'package:healthyways/features/auth/data/models/doctor_profile_model.dart';
+import 'package:healthyways/core/common/models/doctor_profile_model.dart';
 import 'package:healthyways/core/common/models/patient_profile_model.dart';
 import 'package:healthyways/features/auth/data/models/pharmacist_profile_model.dart';
 

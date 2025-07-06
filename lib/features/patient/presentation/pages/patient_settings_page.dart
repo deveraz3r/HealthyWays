@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/instance_manager.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
 
 class PatientSettingsPage extends StatelessWidget {
   static route() => MaterialPageRoute(builder: (context) => const PatientSettingsPage());
@@ -63,6 +65,8 @@ class PatientSettingsPage extends StatelessWidget {
         'title': 'Logout',
         'icon': Icons.logout,
         'onTap': () {
+          Get.find<AuthController>().signOut();
+          Navigator.pop(context);
           print("Logout tapped");
         },
       },

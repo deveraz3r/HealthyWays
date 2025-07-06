@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:healthyways/core/common/controllers/app_patient_controller.dart';
 import 'package:healthyways/core/common/entites/patient_profile.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:healthyways/features/patient/presentation/controllers/patient_controller.dart';
 
 class PatientDemographicsPage extends StatefulWidget {
   static route() => MaterialPageRoute(builder: (context) => const PatientDemographicsPage());
@@ -40,7 +40,7 @@ class _PatientDemographicsPageState extends State<PatientDemographicsPage> {
   @override
   void initState() {
     super.initState();
-    final patient = Get.find<AppPatientController>().patient.data!;
+    final patient = Get.find<PatientController>().patient.data!;
     _firstNameController = TextEditingController(text: patient.fName);
     _lastNameController = TextEditingController(text: patient.lName);
     _emailController = TextEditingController(text: patient.email);
@@ -62,7 +62,7 @@ class _PatientDemographicsPageState extends State<PatientDemographicsPage> {
 
   void _saveChanges() {
     if (_formKey.currentState!.validate()) {
-      final patientController = Get.find<AppPatientController>();
+      final patientController = Get.find<PatientController>();
       final currentPatient = patientController.patient.data!;
 
       final updatedPatient = PatientProfile(

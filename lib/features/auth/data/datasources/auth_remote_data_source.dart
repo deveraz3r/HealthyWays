@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/common/entites/profile.dart';
 import 'package:healthyways/core/constants/supabase/supabase_tables.dart';
@@ -101,18 +102,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await supabaseClient.auth.signUp(
         email: email,
         password: password,
-        data: {"fName": fName, "lName": lName, "gender": gender, "selectedRole": selectedRole ?? "patient"},
+        data: {
+          "fName": fName,
+          "lName": lName,
+          "gender": gender,
+          "selectedRole": selectedRole?.toLowerCase() ?? "patient",
+        },
       );
 
       if (response.user == null) {
         throw ServerException("User is null");
       }
 
+      await supabaseClient.from(SupabaseTables.baseProfileTable).insert({
+        "uid": response.user!.id, // Pass the user ID as uid
+        "email": email,
+        "fName": fName,
+        "lName": lName,
+        "gender": gender,
+        "selectedRole": selectedRole?.toLowerCase() ?? "patient",
+      });
+
       final Profile? profile = await getCurrentUserData();
 
       return profile!;
     } catch (e) {
-      await signOut(); //if auth is succesful but userdata is not found
+      debugPrint("Signing Out...");
+      await signOut(); // If auth is successful but userdata is not found
       throw ServerException(e.toString());
     }
   }

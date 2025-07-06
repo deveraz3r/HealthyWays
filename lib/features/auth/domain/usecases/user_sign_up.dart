@@ -14,7 +14,7 @@ class UserSignUp implements UseCase<Profile, UserSignUpParams> {
       email: params.email,
       password: params.password,
       fName: params.fName,
-      lName: params.fName,
+      lName: params.lName,
       gender: params.gender,
       selectedRole: params.selectedRole,
     );

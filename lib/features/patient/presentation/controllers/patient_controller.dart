@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/core/common/custom_types/visibility.dart';
 import 'package:healthyways/core/common/entites/medication.dart';
 import 'package:healthyways/core/common/entites/medicine.dart';
@@ -6,6 +7,7 @@ import 'package:healthyways/core/common/entites/patient_profile.dart';
 import 'package:healthyways/core/controller/controller_state_manager.dart';
 import 'package:healthyways/core/error/failure.dart';
 import 'package:healthyways/core/usecase/usecase.dart';
+import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
 import 'package:healthyways/features/measurements/domain/entites/measurement_entry.dart';
 import 'package:healthyways/features/patient/domain/usecases/add_measurement_entry.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_all_patients.dart';
@@ -47,6 +49,11 @@ class PatientController extends GetxController {
        _getMedicineById = getMedicineById,
        _toggleMedicationStatusById = toggleMedicationStatusById,
        _patientGetMeasurementEntries = patientGetMeasurementEntries;
+
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  // }
 
   final patient = StateController<Failure, PatientProfile>();
   final allPatients = StateController<Failure, List<PatientProfile>>();

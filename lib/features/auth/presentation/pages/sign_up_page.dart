@@ -58,20 +58,11 @@ class _SignupPageState extends State<SignupPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Sign Up.',
-                  style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
-                ),
+                const Text('Sign Up.', style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 30),
-                AuthField(
-                  hintText: "First Name",
-                  controller: _firstNameController,
-                ),
+                AuthField(hintText: "First Name", controller: _firstNameController),
                 const SizedBox(height: 15),
-                AuthField(
-                  hintText: "Last Name",
-                  controller: _lastNameController,
-                ),
+                AuthField(hintText: "Last Name", controller: _lastNameController),
                 const SizedBox(height: 15),
                 AuthDropdownField(
                   controller: _genderController,
@@ -84,17 +75,9 @@ class _SignupPageState extends State<SignupPage> {
                   hintText: "Select Role",
                 ),
                 const SizedBox(height: 15),
-                AuthField(
-                  hintText: "Email",
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                ),
+                AuthField(hintText: "Email", controller: _emailController, keyboardType: TextInputType.emailAddress),
                 const SizedBox(height: 15),
-                AuthField(
-                  hintText: "Password",
-                  controller: _passwordController,
-                  obscureText: true,
-                ),
+                AuthField(hintText: "Password", controller: _passwordController, obscureText: true),
                 const SizedBox(height: 20),
                 PrimaryGradientButton(
                   buttonText: "Sign Up",
@@ -109,6 +92,7 @@ class _SignupPageState extends State<SignupPage> {
                         //remove if you want new usesr to always be patient
                         selectedRole: _roleController.text, //nullable
                       );
+                      Navigator.pop(context); //move to home page after succesfull login
                     }
                   },
                 ),
@@ -124,8 +108,7 @@ class _SignupPageState extends State<SignupPage> {
                       children: [
                         TextSpan(
                           text: "Login",
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(color: AppPallete.gradient2),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppPallete.gradient2),
                         ),
                       ],
                     ),

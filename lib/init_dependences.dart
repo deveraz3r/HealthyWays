@@ -1,6 +1,4 @@
-import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_medications_controller.dart';
-import 'package:healthyways/core/common/controllers/app_patient_controller.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:healthyways/features/auth/data/repositories/auth_repository_impl.dart';
@@ -10,6 +8,14 @@ import 'package:healthyways/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:healthyways/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:healthyways/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
+import 'package:healthyways/features/diary/data/datasources/diary_remote_data_source.dart';
+import 'package:healthyways/features/diary/data/repositories/diary_repository_impl.dart';
+import 'package:healthyways/features/diary/domain/repositories/diary_repository.dart';
+import 'package:healthyways/features/diary/domain/usecases/create_diary_entry.dart';
+import 'package:healthyways/features/diary/domain/usecases/delete_diary_entry.dart';
+import 'package:healthyways/features/diary/domain/usecases/get_all_diary_entries.dart';
+import 'package:healthyways/features/diary/domain/usecases/update_diary_entry.dart';
+import 'package:healthyways/features/diary/presentation/controllers/diary_controller.dart';
 import 'package:healthyways/features/doctor/data/datasources/doctor_remote_data_source.dart';
 import 'package:healthyways/features/doctor/data/repositories/doctor_repository_impl.dart';
 import 'package:healthyways/features/doctor/domain/repositories/doctor_repository.dart';
@@ -17,6 +23,13 @@ import 'package:healthyways/features/doctor/domain/usecases/get_all_doctors.dart
 import 'package:healthyways/features/doctor/domain/usecases/get_doctor_by_id.dart';
 import 'package:healthyways/features/doctor/domain/usecases/update_doctor_profile.dart';
 import 'package:healthyways/features/doctor/presentation/controllers/doctor_controller.dart';
+import 'package:healthyways/features/immunization/data/datasources/immunization_remote_data_source.dart';
+import 'package:healthyways/features/immunization/data/repositories/immunization_repository_impl.dart';
+import 'package:healthyways/features/immunization/domain/usecases/create_immunization_entry.dart';
+import 'package:healthyways/features/immunization/domain/usecases/delete_immunization_entry.dart';
+import 'package:healthyways/features/immunization/domain/usecases/get_all_immunization_entries.dart';
+import 'package:healthyways/features/immunization/domain/usecases/update_immunization_entry.dart';
+import 'package:healthyways/features/immunization/presentation/controllers/immunization_controller.dart';
 import 'package:healthyways/features/measurements/data/datasources/measurement_remote_data_source.dart';
 import 'package:healthyways/features/measurements/data/repositories/measurement_repository_impl.dart';
 import 'package:healthyways/features/measurements/domain/repositories/measurement_repository.dart';
@@ -68,6 +81,7 @@ import 'package:healthyways/features/updates/presentation/controllers/updates_co
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
+import 'package:healthyways/features/immunization/domain/repositories/immunization_repository.dart';
 
 final serviceLocator = GetIt.instance;
 
@@ -84,12 +98,16 @@ Future<void> initDependencies() async {
 
   // Initialize feature-specific dependencies
   _initAuth();
+
   _initPatient();
+  _initDoctor();
+  _initPharmacist();
+
   _initMedications();
   _initUpdates();
   _initMeasurements();
-  // _initDoctor();
-  // _initPharmacist();
+  _initDiary();
+  _initImmunization();
 }
 
 void _initAuth() {
@@ -170,11 +188,6 @@ void _initPatient() {
       toggleMedicationStatusById: serviceLocator<PatientToggleMedicationStatusById>(),
       patientGetMeasurementEntries: serviceLocator<PatientGetMeasurementEntries>(),
     ),
-  );
-
-  // App-level controller
-  serviceLocator.registerSingleton<AppPatientController>(
-    AppPatientController(patientController: serviceLocator<PatientController>()),
   );
 }
 
@@ -337,6 +350,66 @@ void _initPharmacist() {
       getAllPharmacists: serviceLocator<GetAllPharmacists>(),
       getPharmacistById: serviceLocator<GetPharmacistById>(),
       updatePharmacistProfile: serviceLocator<UpdatePharmacistProfile>(),
+    ),
+  );
+}
+
+void _initDiary() {
+  // Data sources
+  serviceLocator.registerFactory<DiaryRemoteDataSource>(
+    () => DiaryRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+  );
+
+  // Repositories
+  serviceLocator.registerFactory<DiaryRepository>(() => DiaryRepositoryImpl(serviceLocator<DiaryRemoteDataSource>()));
+
+  // Use cases
+  serviceLocator
+    ..registerFactory<GetAllDiaryEntries>(() => GetAllDiaryEntries(serviceLocator<DiaryRepository>()))
+    ..registerFactory<UpdateDiaryEntry>(() => UpdateDiaryEntry(serviceLocator<DiaryRepository>()))
+    ..registerFactory<CreateDiaryEntry>(() => CreateDiaryEntry(serviceLocator<DiaryRepository>()))
+    ..registerFactory<DeleteDiaryEntry>(() => DeleteDiaryEntry(serviceLocator<DiaryRepository>()));
+
+  // Controller
+  serviceLocator.registerSingleton<DiaryController>(
+    DiaryController(
+      appProfileController: serviceLocator<AppProfileController>(),
+      getAllDiaryEntries: serviceLocator<GetAllDiaryEntries>(),
+      updateDiaryEntry: serviceLocator<UpdateDiaryEntry>(),
+      createDiaryEntry: serviceLocator<CreateDiaryEntry>(),
+      deleteDiaryEntry: serviceLocator<DeleteDiaryEntry>(),
+    ),
+  );
+}
+
+void _initImmunization() {
+  // Data sources
+  serviceLocator.registerFactory<ImmunizationRemoteDataSource>(
+    () => ImmunizationRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+  );
+
+  // Repositories
+  serviceLocator.registerFactory<ImmunizationRepository>(
+    () => ImmunizationRepositoryImpl(serviceLocator<ImmunizationRemoteDataSource>()),
+  );
+
+  // Use cases
+  serviceLocator
+    ..registerFactory<GetAllImmunizationEntries>(
+      () => GetAllImmunizationEntries(serviceLocator<ImmunizationRepository>()),
+    )
+    ..registerFactory<CreateImmunizationEntry>(() => CreateImmunizationEntry(serviceLocator<ImmunizationRepository>()))
+    ..registerFactory<UpdateImmunizationEntry>(() => UpdateImmunizationEntry(serviceLocator<ImmunizationRepository>()))
+    ..registerFactory<DeleteImmunizationEntry>(() => DeleteImmunizationEntry(serviceLocator<ImmunizationRepository>()));
+
+  // Controller
+  serviceLocator.registerSingleton<ImmunizationController>(
+    ImmunizationController(
+      appProfileController: serviceLocator<AppProfileController>(),
+      getAllImmunizationEntries: serviceLocator<GetAllImmunizationEntries>(),
+      createImmunizationEntry: serviceLocator<CreateImmunizationEntry>(),
+      updateImmunizationEntry: serviceLocator<UpdateImmunizationEntry>(),
+      deleteImmunizationEntry: serviceLocator<DeleteImmunizationEntry>(),
     ),
   );
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:healthyways/core/common/controllers/app_patient_controller.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/patient/presentation/pages/patient_demographics_page.dart';

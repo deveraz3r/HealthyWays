@@ -11,13 +11,11 @@ class DiaryRepositoryImpl implements DiaryRepository {
   DiaryRepositoryImpl(this.dataSource);
 
   @override
-  Future<Either<Failure, Diary>> createDiaryEntry(Diary diary) async {
+  Future<Either<Failure, void>> createDiaryEntry(Diary diary) async {
     try {
-      final DiaryModel diaryModel = DiaryModel(id: diary.id);
+      await dataSource.createDiaryEntry(DiaryModel.fromEntity(diary));
 
-      final response = await dataSource.createDiaryEntry(diaryModel);
-
-      return right(response);
+      return right(null);
     } on ServerException catch (e) {
       throw Left(Failure(e.message));
     }
@@ -46,11 +44,13 @@ class DiaryRepositoryImpl implements DiaryRepository {
   }
 
   @override
-  Future<Either<Failure, Diary>> updateDiaryEntry(Diary diary) async {
+  Future<Either<Failure, Diary>> updateDiaryEntry({
+    required String id,
+    required String title,
+    required String body,
+  }) async {
     try {
-      final DiaryModel diaryModel = DiaryModel(id: diary.id);
-
-      final response = await dataSource.updateDiaryEntry(diaryModel);
+      final response = await dataSource.updateDiaryEntry(id: id, title: title, body: body);
 
       return right(response);
     } on ServerException catch (e) {

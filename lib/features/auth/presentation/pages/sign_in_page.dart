@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Obx(() {
-          if (_authController.profile.state == controller.State.loading) {
+          if (_authController.profile.rxState.value == controller.State.loading) {
             return Loader();
           }
 

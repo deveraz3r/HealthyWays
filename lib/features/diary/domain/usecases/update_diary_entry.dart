@@ -10,12 +10,14 @@ class UpdateDiaryEntry implements UseCase<Diary, UpdateDiaryEntryParams> {
 
   @override
   Future<Either<Failure, Diary>> call(params) async {
-    return await repository.updateDiaryEntry(params.diary);
+    return await repository.updateDiaryEntry(id: params.id, title: params.title, body: params.body);
   }
 }
 
 class UpdateDiaryEntryParams {
-  Diary diary;
+  String id;
+  String title;
+  String body;
 
-  UpdateDiaryEntryParams({required this.diary});
+  UpdateDiaryEntryParams({required this.id, required this.title, required this.body});
 }

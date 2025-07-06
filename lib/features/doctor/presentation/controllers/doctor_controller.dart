@@ -30,10 +30,7 @@ class DoctorController extends GetxController {
 
     final result = await _getDoctorById(GetDoctorByIdParams(uid: uid));
 
-    result.fold(
-      (failure) => doctor.setError(failure),
-      (data) => doctor.setData(data),
-    );
+    result.fold((failure) => doctor.setError(failure), (data) => doctor.setData(data));
   }
 
   Future<void> getAllDoctors() async {
@@ -41,18 +38,13 @@ class DoctorController extends GetxController {
 
     final result = await _getAllDoctors(NoParams());
 
-    result.fold(
-      (failure) => allDoctors.setError(failure),
-      (data) => allDoctors.setData(data),
-    );
+    result.fold((failure) => allDoctors.setError(failure), (data) => allDoctors.setData(data));
   }
 
   Future<void> updateDoctor(DoctorProfile updatedProfile) async {
     doctor.setLoading();
 
-    final result = await _updateDoctorProfile(
-      UpdateDoctorProfileParams(doctor: updatedProfile),
-    );
+    final result = await _updateDoctorProfile(UpdateDoctorProfileParams(doctor: updatedProfile));
 
     result.fold(
       (failure) => doctor.setError(failure),

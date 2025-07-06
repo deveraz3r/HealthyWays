@@ -1,6 +1,6 @@
 import 'package:healthyways/core/common/custom_types/rating.dart';
-import 'package:healthyways/core/common/entites/doctor_profile.dart';
 import 'package:healthyways/core/common/custom_types/role.dart';
+import 'package:healthyways/core/common/entites/doctor_profile.dart';
 
 class DoctorProfileModel extends DoctorProfile {
   DoctorProfileModel({
@@ -12,7 +12,6 @@ class DoctorProfileModel extends DoctorProfile {
     required super.gender,
     required super.preferedLanguage,
     required super.selectedRole,
-
     required super.bio,
     required super.specality,
     required super.qualification,
@@ -28,15 +27,11 @@ class DoctorProfileModel extends DoctorProfile {
       address: json['address'],
       gender: json['gender'] ?? '',
       preferedLanguage: json['preferedLanguage'] ?? '',
-      selectedRole: RoleExtension.fromJson(json['selectedRole']),
+      selectedRole: RoleExtension.fromJson(json['selectedRole'] ?? 'doctor'),
       bio: json['bio'] ?? '',
       specality: json['specality'] ?? '',
       qualification: json['qualification'] ?? '',
-      rating:
-          (json['rating'] as List<dynamic>?)
-              ?.map((e) => Rating.fromJson(e))
-              .toList() ??
-          [],
+      rating: (json['rating'] as List<dynamic>?)?.map((e) => Rating.fromJson(e as Map<String, dynamic>)).toList() ?? [],
     );
   }
 

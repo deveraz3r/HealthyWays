@@ -3,8 +3,13 @@ import 'package:get/get_core/get_core.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/features/diary/presentation/pages/diary_home_page.dart';
+import 'package:healthyways/features/doctor/presentation/pages/all_doctors_page.dart';
+import 'package:healthyways/features/immunization/presentation/pages/immunization_home_page.dart';
+// import 'package:healthyways/features/immunization/presentation/pages/immunization_home_page.dart';
 import 'package:healthyways/features/measurements/presentation/pages/my_measurements_page.dart';
 import 'package:healthyways/features/medication/presentation/pages/add_new_medication_page.dart';
+import 'package:healthyways/features/pharmacist/presentation/pages/all_pharmacists_page.dart';
 
 class PatientMorePage extends StatelessWidget {
   static route() => MaterialPageRoute(builder: (context) => PatientMorePage());
@@ -19,6 +24,7 @@ class PatientMorePage extends StatelessWidget {
         'title': 'Doctors',
         'icon': Icons.medical_services,
         'onTap': () {
+          Navigator.push(context, AllDoctorsPage.route());
           print("Doctors tapped");
         },
       },
@@ -26,6 +32,7 @@ class PatientMorePage extends StatelessWidget {
         'title': 'Pharmacists',
         'icon': Icons.local_pharmacy,
         'onTap': () {
+          Navigator.push(context, AllPharmacistsPage.route());
           print("Pharmacists tapped");
         },
       },
@@ -55,16 +62,18 @@ class PatientMorePage extends StatelessWidget {
         'title': 'Immunizations',
         'icon': Icons.vaccines,
         'onTap': () {
+          Navigator.push(context, ImmunizationHomePage.route());
           print("Immunizations tapped");
         },
       },
-      // {
-      //   'title': 'Diary',
-      //   'icon': Icons.note,
-      //   'onTap': () {
-      //     print("Diary tapped");
-      //   },
-      // },
+      {
+        'title': 'Diary',
+        'icon': Icons.note,
+        'onTap': () {
+          Navigator.push(context, DiaryHomePage.route());
+          print("Diary tapped");
+        },
+      },
       {
         'title': 'Add Medication',
         'icon': Icons.add,

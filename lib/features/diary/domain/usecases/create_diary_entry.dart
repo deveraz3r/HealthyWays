@@ -4,12 +4,12 @@ import 'package:healthyways/core/usecase/usecase.dart';
 import 'package:healthyways/features/diary/domain/entites/diary.dart';
 import 'package:healthyways/features/diary/domain/repositories/diary_repository.dart';
 
-class CreateDiaryEntry implements UseCase<Diary, CreateDiaryEntryParams> {
+class CreateDiaryEntry implements UseCase<void, CreateDiaryEntryParams> {
   DiaryRepository repository;
   CreateDiaryEntry(this.repository);
 
   @override
-  Future<Either<Failure, Diary>> call(params) async {
+  Future<Either<Failure, void>> call(params) async {
     return await repository.createDiaryEntry(params.diary);
   }
 }
