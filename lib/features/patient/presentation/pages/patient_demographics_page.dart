@@ -77,7 +77,7 @@ class _PatientDemographicsPageState extends State<PatientDemographicsPage> {
         race: _selectedRaces.join(', '),
         isMarried: _isMarried,
         emergencyContacts: currentPatient.emergencyContacts,
-        insuranceIds: currentPatient.insuranceIds,
+        myProviders: currentPatient.myProviders,
         globalVisibility: currentPatient.globalVisibility,
         allergiesVisibility: currentPatient.allergiesVisibility,
         immunizationsVisibility: currentPatient.immunizationsVisibility,

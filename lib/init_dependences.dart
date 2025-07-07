@@ -1,5 +1,13 @@
 import 'package:healthyways/core/common/controllers/app_medications_controller.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
+import 'package:healthyways/features/allergies/data/datasources/allergies_remote_data_source.dart';
+import 'package:healthyways/features/allergies/data/repositories/allergie_repository_impl.dart';
+import 'package:healthyways/features/allergies/domain/repositories/allergie_repository.dart';
+import 'package:healthyways/features/allergies/domain/usecases/create_allergie_entry.dart';
+import 'package:healthyways/features/allergies/domain/usecases/delete_allergie_entry.dart';
+import 'package:healthyways/features/allergies/domain/usecases/get_all_allergie_entries.dart';
+import 'package:healthyways/features/allergies/domain/usecases/update_allergie_entry.dart';
+import 'package:healthyways/features/allergies/presentation/controllers/allergie_controller.dart';
 import 'package:healthyways/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:healthyways/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:healthyways/features/auth/domain/repositories/auth_repository.dart';
@@ -56,11 +64,14 @@ import 'package:healthyways/features/medication/presentation/controllers/medicat
 import 'package:healthyways/features/patient/data/datasources/patient_remote_data_source.dart';
 import 'package:healthyways/features/patient/data/repositories/patient_repository_impl.dart';
 import 'package:healthyways/features/patient/domain/repositories/patient_repository.dart';
+import 'package:healthyways/features/patient/domain/usecases/add_my_provider.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_all_patients.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_medicine_by_id.dart';
+import 'package:healthyways/features/patient/domain/usecases/get_my_providers.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_patient_by_id.dart';
 import 'package:healthyways/features/patient/domain/usecases/patient_get_all_medications.dart';
 import 'package:healthyways/features/patient/domain/usecases/patient_get_measurement_entries.dart';
+import 'package:healthyways/features/patient/domain/usecases/remove_my_provider.dart';
 import 'package:healthyways/features/patient/domain/usecases/toggle_medication_status_by_id.dart';
 import 'package:healthyways/features/patient/domain/usecases/update_patient_profile.dart';
 import 'package:healthyways/features/patient/domain/usecases/update_visibility_settings.dart';
@@ -97,6 +108,7 @@ Future<void> initDependencies() async {
   serviceLocator.registerSingleton<SupabaseClient>(supabase.client);
 
   // Initialize feature-specific dependencies
+  // Do not change the secquence of initlization some features depend on others
   _initAuth();
 
   _initPatient();
@@ -108,6 +120,7 @@ Future<void> initDependencies() async {
   _initMeasurements();
   _initDiary();
   _initImmunization();
+  _initAllergies();
 }
 
 void _initAuth() {
@@ -172,7 +185,10 @@ void _initPatient() {
     )
     ..registerFactory<PatientGetMeasurementEntries>(
       () => PatientGetMeasurementEntries(serviceLocator<PatientRepository>()),
-    );
+    )
+    ..registerFactory<GetMyProviders>(() => GetMyProviders(serviceLocator<PatientRepository>()))
+    ..registerFactory<AddMyProvider>(() => AddMyProvider(serviceLocator<PatientRepository>()))
+    ..registerFactory<RemoveMyProvider>(() => RemoveMyProvider(serviceLocator<PatientRepository>()));
 
   // Controller
   serviceLocator.registerSingleton<PatientController>(
@@ -187,6 +203,10 @@ void _initPatient() {
       getMedicineById: serviceLocator<PatientGetMedicineById>(),
       toggleMedicationStatusById: serviceLocator<PatientToggleMedicationStatusById>(),
       patientGetMeasurementEntries: serviceLocator<PatientGetMeasurementEntries>(),
+
+      getMyProviders: serviceLocator<GetMyProviders>(),
+      addMyProvider: serviceLocator<AddMyProvider>(),
+      removeMyProvider: serviceLocator<RemoveMyProvider>(),
     ),
   );
 }
@@ -410,6 +430,36 @@ void _initImmunization() {
       createImmunizationEntry: serviceLocator<CreateImmunizationEntry>(),
       updateImmunizationEntry: serviceLocator<UpdateImmunizationEntry>(),
       deleteImmunizationEntry: serviceLocator<DeleteImmunizationEntry>(),
+    ),
+  );
+}
+
+void _initAllergies() {
+  // Data sources
+  serviceLocator.registerFactory<AllergiesRemoteDataSource>(
+    () => AllergiesRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+  );
+
+  // Repositories
+  serviceLocator.registerFactory<AllergiesRepository>(
+    () => AllergiesRepositoryImpl(serviceLocator<AllergiesRemoteDataSource>()),
+  );
+
+  // Use cases
+  serviceLocator
+    ..registerFactory<GetAllAllergyEntries>(() => GetAllAllergyEntries(serviceLocator<AllergiesRepository>()))
+    ..registerFactory<CreateAllergyEntry>(() => CreateAllergyEntry(serviceLocator<AllergiesRepository>()))
+    ..registerFactory<UpdateAllergyEntry>(() => UpdateAllergyEntry(serviceLocator<AllergiesRepository>()))
+    ..registerFactory<DeleteAllergyEntry>(() => DeleteAllergyEntry(serviceLocator<AllergiesRepository>()));
+
+  // Controller
+  serviceLocator.registerSingleton<AllergiesController>(
+    AllergiesController(
+      appProfileController: serviceLocator<AppProfileController>(),
+      getAllAllergieEntries: serviceLocator<GetAllAllergyEntries>(),
+      createAllergieEntry: serviceLocator<CreateAllergyEntry>(),
+      updateAllergieEntry: serviceLocator<UpdateAllergyEntry>(),
+      deleteAllergieEntry: serviceLocator<DeleteAllergyEntry>(),
     ),
   );
 }

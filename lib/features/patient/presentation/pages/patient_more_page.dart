@@ -3,12 +3,13 @@ import 'package:get/get_core/get_core.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/features/allergies/presentation/pages/allergy_home_page.dart';
 import 'package:healthyways/features/diary/presentation/pages/diary_home_page.dart';
 import 'package:healthyways/features/doctor/presentation/pages/all_doctors_page.dart';
 import 'package:healthyways/features/immunization/presentation/pages/immunization_home_page.dart';
-// import 'package:healthyways/features/immunization/presentation/pages/immunization_home_page.dart';
 import 'package:healthyways/features/measurements/presentation/pages/my_measurements_page.dart';
 import 'package:healthyways/features/medication/presentation/pages/add_new_medication_page.dart';
+import 'package:healthyways/features/patient/presentation/pages/my_providers_page.dart';
 import 'package:healthyways/features/pharmacist/presentation/pages/all_pharmacists_page.dart';
 
 class PatientMorePage extends StatelessWidget {
@@ -25,7 +26,6 @@ class PatientMorePage extends StatelessWidget {
         'icon': Icons.medical_services,
         'onTap': () {
           Navigator.push(context, AllDoctorsPage.route());
-          print("Doctors tapped");
         },
       },
       {
@@ -33,14 +33,19 @@ class PatientMorePage extends StatelessWidget {
         'icon': Icons.local_pharmacy,
         'onTap': () {
           Navigator.push(context, AllPharmacistsPage.route());
-          print("Pharmacists tapped");
+        },
+      },
+      {
+        'title': 'My Providers',
+        'icon': Icons.local_pharmacy,
+        'onTap': () {
+          Navigator.push(context, MyProvidersPage.route());
         },
       },
       {
         'title': 'Trackers',
         'icon': Icons.monitor_heart,
         'onTap': () {
-          print("Measurements tapped");
           Navigator.push(context, MyMeasurementsPage.route());
         },
       },
@@ -55,7 +60,7 @@ class PatientMorePage extends StatelessWidget {
         'title': 'Allergies',
         'icon': Icons.warning_amber,
         'onTap': () {
-          print("Allergies tapped");
+          Navigator.push(context, AllergyHomePage.route());
         },
       },
       {
@@ -63,7 +68,6 @@ class PatientMorePage extends StatelessWidget {
         'icon': Icons.vaccines,
         'onTap': () {
           Navigator.push(context, ImmunizationHomePage.route());
-          print("Immunizations tapped");
         },
       },
       {
@@ -71,7 +75,6 @@ class PatientMorePage extends StatelessWidget {
         'icon': Icons.note,
         'onTap': () {
           Navigator.push(context, DiaryHomePage.route());
-          print("Diary tapped");
         },
       },
       {
@@ -79,7 +82,6 @@ class PatientMorePage extends StatelessWidget {
         'icon': Icons.add,
         'onTap': () {
           Navigator.push(context, AddNewMedicationPage.route(assignedTo: _appProfileController.profile.data!.uid));
-          print("Add Medication tapped");
         },
       },
     ];

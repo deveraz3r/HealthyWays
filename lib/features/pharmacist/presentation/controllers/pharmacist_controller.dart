@@ -20,20 +20,20 @@ class PharmacistController extends GetxController {
        _getPharmacistById = getPharmacistById,
        _updatePharmacistProfile = updatePharmacistProfile;
 
-  final pharmacists = StateController<Failure, List<PharmacistProfile>>();
+  final allPharmacists = StateController<Failure, List<PharmacistProfile>>();
   final selectedPharmacist = StateController<Failure, PharmacistProfile>();
 
   Future<void> fetchAllPharmacists() async {
-    pharmacists.setLoading();
+    allPharmacists.setLoading();
 
     final result = await _getAllPharmacists(NoParams());
 
     result.fold(
       (failure) {
-        pharmacists.setError(failure);
+        allPharmacists.setError(failure);
       },
       (pharmacistList) {
-        pharmacists.setData(pharmacistList);
+        allPharmacists.setData(pharmacistList);
       },
     );
   }
@@ -56,17 +56,25 @@ class PharmacistController extends GetxController {
   Future<void> updatePharmacistProfile(PharmacistProfile pharmacist) async {
     selectedPharmacist.setLoading();
 
-    final result = await _updatePharmacistProfile(
-      UpdatePharmacistProfileParams(pharmacist: pharmacist),
-    );
+    final result = await _updatePharmacistProfile(UpdatePharmacistProfileParams(pharmacist: pharmacist));
 
     result.fold(
       (failure) {
         selectedPharmacist.setError(failure);
       },
       (_) {
-        // Refresh the list after update
-        fetchAllPharmacists();
+        // Update the local list of pharmacists
+        final updatedList =
+            allPharmacists.data?.map((existingPharmacist) {
+              return existingPharmacist.uid == pharmacist.uid ? pharmacist : existingPharmacist;
+            }).toList();
+
+        if (updatedList != null) {
+          allPharmacists.setData(updatedList);
+        }
+
+        // Update the selected pharmacist locally
+        selectedPharmacist.setData(pharmacist);
       },
     );
   }

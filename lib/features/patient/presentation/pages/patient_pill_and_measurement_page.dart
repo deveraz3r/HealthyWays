@@ -103,7 +103,7 @@ class _PatientPillAndMeasurementPageState extends State<PatientPillAndMeasuremen
   Widget _buildScheduleList(List<_ScheduleItem> items) {
     if (items.isEmpty) {
       return const Center(
-        child: Padding(padding: EdgeInsets.all(16.0), child: Text('No medications or measurements for today.')),
+        child: Padding(padding: EdgeInsets.all(16.0), child: Text('No medications or measurements on this day.')),
       );
     }
 

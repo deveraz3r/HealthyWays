@@ -20,4 +20,8 @@ abstract class PatientRepository {
 
   Future<Either<Failure, void>> toggleMedicationStatusById({required String id, DateTime? timeTaken});
   Future<Either<Failure, void>> updateVisibilitySettings({required String featureId, required Visibility visibility});
+
+  Future<Either<Failure, List<String>>> getMyProviders();
+  Future<Either<Failure, void>> addMyProvider(String providerId);
+  Future<Either<Failure, void>> removeMyProvider(String providerId);
 }

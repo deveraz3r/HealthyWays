@@ -125,4 +125,34 @@ class PatientRepositoryImpl implements PatientRepository {
       return left(Failure(e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, List<String>>> getMyProviders() async {
+    try {
+      final providers = await remoteDataSource.getMyProviders();
+      return Right(providers);
+    } on ServerException catch (e) {
+      return Left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addMyProvider(String providerId) async {
+    try {
+      await remoteDataSource.addMyProvider(providerId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> removeMyProvider(String providerId) async {
+    try {
+      await remoteDataSource.removeMyProvider(providerId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(Failure(e.message));
+    }
+  }
 }

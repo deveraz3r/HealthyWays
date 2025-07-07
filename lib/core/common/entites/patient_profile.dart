@@ -7,7 +7,7 @@ class PatientProfile extends Profile {
   final String? race; // Nullable
   final bool isMarried;
   final List<String> emergencyContacts;
-  final List<String> insuranceIds;
+  final List<String> myProviders;
 
   final Visibility globalVisibility;
 
@@ -33,7 +33,7 @@ class PatientProfile extends Profile {
     this.race,
     required this.isMarried,
     required this.emergencyContacts,
-    required this.insuranceIds,
+    required this.myProviders,
 
     required this.globalVisibility,
 

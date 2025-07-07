@@ -54,16 +54,16 @@ class _AllPharmacistsPageState extends State<AllPharmacistsPage> {
           // Pharmacists List
           Expanded(
             child: Obx(() {
-              if (_pharmacistController.pharmacists.isLoading) {
+              if (_pharmacistController.allPharmacists.isLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (_pharmacistController.pharmacists.hasError) {
-                return Center(child: Text('Error: ${_pharmacistController.pharmacists.error?.message}'));
+              if (_pharmacistController.allPharmacists.hasError) {
+                return Center(child: Text('Error: ${_pharmacistController.allPharmacists.error?.message}'));
               }
 
               final pharmacists =
-                  _pharmacistController.pharmacists.data!.where((pharmacist) {
+                  _pharmacistController.allPharmacists.data!.where((pharmacist) {
                     final searchLower = _searchQuery.toLowerCase();
                     return pharmacist.fName.toLowerCase().contains(searchLower) ||
                         pharmacist.lName.toLowerCase().contains(searchLower) ||

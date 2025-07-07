@@ -33,47 +33,12 @@ class _GlobalSettingsPageState extends State<GlobalSettingsPage> {
 
     final newVisibility = custom_visibility.Visibility(
       type: newType ?? _selectedType,
-      customAccess: newType == VisibilityType.custom ? (newCustomList ?? _customAccessList.toList()) : [],
+      customAccess:
+          (newType ?? _selectedType) == VisibilityType.custom ? (newCustomList ?? _customAccessList.toList()) : [],
     );
 
     final updatedProfile = patientProfile.copyWith(globalVisibility: newVisibility);
-
     _profileController.updateProfile(updatedProfile);
-  }
-
-  void _showAddEmailDialog() {
-    final emailController = TextEditingController();
-    showDialog(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Add Email Access'),
-            content: TextField(
-              controller: emailController,
-              decoration: const InputDecoration(hintText: 'Enter email address'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-              ElevatedButton(
-                onPressed: () {
-                  final email = emailController.text.trim();
-                  if (email.isNotEmpty && email.contains('@')) {
-                    _customAccessList.add(email);
-                    _updateGlobalSettings(newCustomList: _customAccessList.toList());
-                    Navigator.pop(ctx);
-                  }
-                },
-                child: const Text('Add'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _removeCustomAccess(String email) {
-    _customAccessList.remove(email);
-    _updateGlobalSettings(newCustomList: _customAccessList.toList());
   }
 
   @override
@@ -85,7 +50,6 @@ class _GlobalSettingsPageState extends State<GlobalSettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Visibility Settings
             const Text('Global Visibility Level', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const SizedBox(height: 8),
 
@@ -93,6 +57,7 @@ class _GlobalSettingsPageState extends State<GlobalSettingsPage> {
               value: _selectedType,
               items:
                   VisibilityType.values
+                      .where((type) => type != VisibilityType.disabled) // Remove disabled option from global settings
                       .map((type) => DropdownMenuItem(value: type, child: Text(_getVisibilityTypeTitle(type))))
                       .toList(),
               onChanged: (value) {
@@ -109,7 +74,6 @@ class _GlobalSettingsPageState extends State<GlobalSettingsPage> {
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
 
-            // Custom Access Section
             if (_selectedType == VisibilityType.custom) ...[
               const SizedBox(height: 24),
               Row(
@@ -168,37 +132,65 @@ class _GlobalSettingsPageState extends State<GlobalSettingsPage> {
     switch (type) {
       case VisibilityType.global:
         return 'Global';
-      case VisibilityType.all:
-        return 'All Healthcare Providers';
-      case VisibilityType.doctors:
-        return 'Doctors Only';
-      case VisibilityType.pharmacist:
-        return 'Pharmacists Only';
+      case VisibilityType.myProviders:
+        return 'My Healthcare Providers';
       case VisibilityType.custom:
         return 'Custom';
       case VisibilityType.private:
         return 'Only Me';
       case VisibilityType.disabled:
-        return 'Disabled';
+        return 'Disabled'; // This won't be shown as it's filtered out
     }
   }
 
   String _getVisibilityTypeDescription(VisibilityType type) {
     switch (type) {
       case VisibilityType.global:
-        return 'Everyone can see measurements by default';
-      case VisibilityType.all:
-        return 'All healthcare providers can see measurements by default';
-      case VisibilityType.doctors:
-        return 'Only doctors can see measurements by default';
-      case VisibilityType.pharmacist:
-        return 'Only pharmacists can see measurements by default';
+        return 'Everyone can see your information by default';
+      case VisibilityType.myProviders:
+        return 'Only healthcare providers you have connected with can see your information';
       case VisibilityType.custom:
-        return 'Only specific people can see measurements by default';
+        return 'Only specific people can see your information';
       case VisibilityType.private:
-        return 'Only you can see measurements by default';
+        return 'Only you can see your information';
       case VisibilityType.disabled:
-        return 'Only you can see measurements by default';
+        return 'Visibility will be controlled by feature specific settings';
     }
+  }
+
+  // Keep existing dialog methods
+  void _showAddEmailDialog() {
+    final emailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Add Email Access'),
+            content: TextField(
+              controller: emailController,
+              decoration: const InputDecoration(hintText: 'Enter email address'),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              ElevatedButton(
+                onPressed: () {
+                  final email = emailController.text.trim();
+                  if (email.isNotEmpty && email.contains('@')) {
+                    _customAccessList.add(email);
+                    _updateGlobalSettings(newCustomList: _customAccessList.toList());
+                    Navigator.pop(ctx);
+                  }
+                },
+                child: const Text('Add'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _removeCustomAccess(String email) {
+    _customAccessList.remove(email);
+    _updateGlobalSettings(newCustomList: _customAccessList.toList());
   }
 }

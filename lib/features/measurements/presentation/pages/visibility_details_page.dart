@@ -102,6 +102,36 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
     _updateVisibility(newCustomList: _customAccessList.toList());
   }
 
+  String _getVisibilityTypeTitle(VisibilityType type) {
+    switch (type) {
+      case VisibilityType.global:
+        return 'Global';
+      case VisibilityType.myProviders:
+        return 'My Healthcare Providers';
+      case VisibilityType.custom:
+        return 'Custom';
+      case VisibilityType.private:
+        return 'Only Me';
+      case VisibilityType.disabled:
+        return 'Disabled';
+    }
+  }
+
+  String _getVisibilityTypeDescription(VisibilityType type) {
+    switch (type) {
+      case VisibilityType.global:
+        return 'Measurement is controlled by global app settings';
+      case VisibilityType.myProviders:
+        return 'Only healthcare providers you have connected with can see this measurement';
+      case VisibilityType.custom:
+        return 'Only specific people can see this measurement';
+      case VisibilityType.private:
+        return 'Only you can see this measurement';
+      case VisibilityType.disabled:
+        return 'Visibility disabled for this measurement';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,6 +147,7 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
               value: _selectedType,
               items:
                   VisibilityType.values
+                      .where((type) => type != VisibilityType.disabled) // Filter out disabled option
                       .map((type) => DropdownMenuItem(value: type, child: Text(_getVisibilityTypeTitle(type))))
                       .toList(),
               onChanged: (value) {
@@ -132,9 +163,10 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
               _getVisibilityTypeDescription(_selectedType),
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
+
+            // Custom Access List UI - Only show when custom type is selected
             if (_selectedType == VisibilityType.custom) ...[
-              const SizedBox(height: 12),
-              const Divider(),
+              const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -147,38 +179,7 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
                 if (_customAccessList.isEmpty) {
                   return const Text('Add people with private access', style: TextStyle(color: Colors.grey));
                 }
-                return Column(
-                  children:
-                      _customAccessList.map((email) {
-                        return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: AppPallete.backgroundColor2,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                            border: Border.all(color: Colors.black12),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.email_outlined, color: Colors.grey),
-                              const SizedBox(width: 10),
-                              Expanded(child: Text(email, style: const TextStyle(fontSize: 15))),
-                              IconButton(
-                                icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
-                                onPressed: () => _removeCustomAccess(email),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                );
+                return Column(children: _customAccessList.map((email) => _buildEmailCard(email)).toList());
               }),
             ],
           ],
@@ -187,41 +188,27 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
     );
   }
 
-  String _getVisibilityTypeTitle(VisibilityType type) {
-    switch (type) {
-      case VisibilityType.global:
-        return 'Global';
-      case VisibilityType.all:
-        return 'All Healthcare Providers';
-      case VisibilityType.doctors:
-        return 'Doctors Only';
-      case VisibilityType.pharmacist:
-        return 'Pharmacists Only';
-      case VisibilityType.custom:
-        return 'Custom';
-      case VisibilityType.private:
-        return 'Only Me';
-      case VisibilityType.disabled:
-        return 'Disabled';
-    }
-  }
-
-  String _getVisibilityTypeDescription(VisibilityType type) {
-    switch (type) {
-      case VisibilityType.global:
-        return 'Measurement is controlled by global app settings';
-      case VisibilityType.all:
-        return 'All healthcare providers can see this measurement';
-      case VisibilityType.doctors:
-        return 'Only doctors can see this measurement';
-      case VisibilityType.pharmacist:
-        return 'Only pharmacists can see this measurement';
-      case VisibilityType.custom:
-        return 'Only specific people can see this measurement';
-      case VisibilityType.private:
-        return 'Only you can see this measurement';
-      case VisibilityType.disabled:
-        return 'Only you can see this measurement';
-    }
+  Widget _buildEmailCard(String email) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppPallete.backgroundColor2,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 3))],
+        border: Border.all(color: Colors.black12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.email_outlined, color: Colors.grey),
+          const SizedBox(width: 10),
+          Expanded(child: Text(email, style: const TextStyle(fontSize: 15))),
+          IconButton(
+            icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
+            onPressed: () => _removeCustomAccess(email),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_medications_controller.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
+import 'package:healthyways/features/allergies/presentation/controllers/allergie_controller.dart';
 import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
 import 'package:healthyways/features/diary/presentation/controllers/diary_controller.dart';
 import 'package:healthyways/features/doctor/presentation/controllers/doctor_controller.dart';
@@ -29,4 +30,5 @@ void initializeControllers() {
   Get.put(serviceLocator<UpdatesController>());
   Get.put(serviceLocator<DiaryController>());
   Get.put(serviceLocator<ImmunizationController>());
+  Get.put(serviceLocator<AllergiesController>());
 }

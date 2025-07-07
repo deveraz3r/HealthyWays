@@ -21,6 +21,10 @@ abstract class PatientRemoteDataSource {
   Future<MedicineModel> getMedicineById({required String id});
   Future<void> toggleMedicationStatusById({required String id, DateTime? timeTaken});
   Future<List<MeasurementEntryModel>> getMeasurementEntries({required String patientId, required String measurementId});
+
+  Future<List<String>> getMyProviders();
+  Future<void> addMyProvider(String providerId);
+  Future<void> removeMyProvider(String providerId);
 }
 
 class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
@@ -207,6 +211,54 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
       }).toList();
     } catch (e) {
       material.debugPrint('Error getting measurement entries: $e');
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<String>> getMyProviders() async {
+    try {
+      final profile = appProfileController.profile.data as PatientProfileModel;
+      return profile.myProviders;
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> addMyProvider(String providerId) async {
+    try {
+      final profile = appProfileController.profile.data as PatientProfileModel;
+      final updatedProviders = [...profile.myProviders, providerId];
+
+      await supabaseClient
+          .from(SupabaseTables.patientsTable)
+          .update({'myProviders': updatedProviders})
+          .eq('uid', profile.uid);
+
+      // Update local profile
+      final updatedProfile = profile.copyWith(myProviders: updatedProviders);
+      appProfileController.updateProfile(updatedProfile);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> removeMyProvider(String providerId) async {
+    try {
+      final profile = appProfileController.profile.data as PatientProfileModel;
+      final updatedProviders = profile.myProviders.where((id) => id != providerId).toList();
+
+      await supabaseClient
+          .from(SupabaseTables.patientsTable)
+          .update({'myProviders': updatedProviders})
+          .eq('uid', profile.uid);
+
+      // Update local profile
+      final updatedProfile = profile.copyWith(myProviders: updatedProviders);
+      appProfileController.updateProfile(updatedProfile);
+    } catch (e) {
       throw ServerException(e.toString());
     }
   }

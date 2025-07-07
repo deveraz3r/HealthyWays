@@ -1,4 +1,4 @@
-enum VisibilityType { global, all, doctors, pharmacist, custom, private, disabled }
+enum VisibilityType { global, custom, myProviders, private, disabled }
 
 extension VisiblityTypeExtension on VisibilityType {
   String toJson() => name;

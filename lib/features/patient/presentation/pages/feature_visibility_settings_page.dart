@@ -196,17 +196,13 @@ class _FeatureVisibilitySettingsPageState extends State<FeatureVisibilitySetting
     switch (type) {
       case VisibilityType.global:
         return 'Global';
-      case VisibilityType.all:
-        return 'All Healthcare Providers';
-      case VisibilityType.doctors:
-        return 'Doctors Only';
-      case VisibilityType.pharmacist:
-        return 'Pharmacists Only';
+      case VisibilityType.myProviders:
+        return 'My Healthcare Providers';
       case VisibilityType.custom:
         return 'Custom';
       case VisibilityType.private:
         return 'Only Me';
-      case VisibilityType.disabled: //Only visible in global and measuremnts settings
+      case VisibilityType.disabled:
         return 'Disabled';
     }
   }
@@ -215,12 +211,8 @@ class _FeatureVisibilitySettingsPageState extends State<FeatureVisibilitySetting
     switch (type) {
       case VisibilityType.global:
         return 'Use global visibility settings';
-      case VisibilityType.all:
-        return 'All healthcare providers can see this information';
-      case VisibilityType.doctors:
-        return 'Only doctors can see this information';
-      case VisibilityType.pharmacist:
-        return 'Only pharmacists can see this information';
+      case VisibilityType.myProviders:
+        return 'Only healthcare providers you have connected with can see this information';
       case VisibilityType.custom:
         return 'Only specific people can see this information';
       case VisibilityType.private:

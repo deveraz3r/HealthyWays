@@ -10,11 +10,14 @@ import 'package:healthyways/core/usecase/usecase.dart';
 import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
 import 'package:healthyways/features/measurements/domain/entites/measurement_entry.dart';
 import 'package:healthyways/features/patient/domain/usecases/add_measurement_entry.dart';
+import 'package:healthyways/features/patient/domain/usecases/add_my_provider.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_all_patients.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_medicine_by_id.dart';
+import 'package:healthyways/features/patient/domain/usecases/get_my_providers.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_patient_by_id.dart';
 import 'package:healthyways/features/patient/domain/usecases/patient_get_all_medications.dart';
 import 'package:healthyways/features/patient/domain/usecases/patient_get_measurement_entries.dart';
+import 'package:healthyways/features/patient/domain/usecases/remove_my_provider.dart';
 import 'package:healthyways/features/patient/domain/usecases/toggle_medication_status_by_id.dart';
 import 'package:healthyways/features/patient/domain/usecases/update_patient_profile.dart';
 import 'package:healthyways/features/patient/domain/usecases/update_visibility_settings.dart';
@@ -30,6 +33,10 @@ class PatientController extends GetxController {
   final PatientToggleMedicationStatusById _toggleMedicationStatusById;
   final PatientGetMeasurementEntries _patientGetMeasurementEntries;
 
+  final GetMyProviders _getMyProviders;
+  final AddMyProvider _addMyProvider;
+  final RemoveMyProvider _removeMyProvider;
+
   PatientController({
     required GetPatientById getPatientById,
     required GetAllPatients getAllPatients,
@@ -40,6 +47,10 @@ class PatientController extends GetxController {
     required PatientGetMedicineById getMedicineById,
     required PatientToggleMedicationStatusById toggleMedicationStatusById,
     required PatientGetMeasurementEntries patientGetMeasurementEntries,
+
+    required GetMyProviders getMyProviders,
+    required AddMyProvider addMyProvider,
+    required RemoveMyProvider removeMyProvider,
   }) : _getPatientById = getPatientById,
        _getAllPatients = getAllPatients,
        _updatePatientProfile = updatePatientProfile,
@@ -48,7 +59,10 @@ class PatientController extends GetxController {
        _addMeasurementEntry = addMeasurementEntry,
        _getMedicineById = getMedicineById,
        _toggleMedicationStatusById = toggleMedicationStatusById,
-       _patientGetMeasurementEntries = patientGetMeasurementEntries;
+       _patientGetMeasurementEntries = patientGetMeasurementEntries,
+       _getMyProviders = getMyProviders,
+       _addMyProvider = addMyProvider,
+       _removeMyProvider = removeMyProvider;
 
   // @override
   // void onInit() {
@@ -58,6 +72,7 @@ class PatientController extends GetxController {
   final patient = StateController<Failure, PatientProfile>();
   final allPatients = StateController<Failure, List<PatientProfile>>();
   final patientMedications = StateController<Failure, List<Medication>>();
+  final myProviders = StateController<Failure, List<String>>();
 
   // ========================== Public Methods ===============================
 
@@ -226,5 +241,35 @@ class PatientController extends GetxController {
       print("Error getting entries: $e");
       return [];
     }
+  }
+
+  Future<void> getMyProviders() async {
+    myProviders.setLoading();
+    final result = await _getMyProviders(NoParams());
+    result.fold((failure) => myProviders.setError(failure), (providers) => myProviders.setData(providers));
+  }
+
+  Future<void> addMyProvider(String providerId) async {
+    final result = await _addMyProvider(AddMyProviderParams(providerId: providerId));
+    result.fold(
+      (failure) =>
+          Get.snackbar('Error', 'Failed to add provider: ${failure.message}', snackPosition: SnackPosition.BOTTOM),
+      (_) {
+        Get.snackbar('Success', 'Provider added successfully', snackPosition: SnackPosition.BOTTOM);
+        getMyProviders(); // Refresh the list
+      },
+    );
+  }
+
+  Future<void> removeMyProvider(String providerId) async {
+    final result = await _removeMyProvider(RemoveMyProviderParams(providerId: providerId));
+    result.fold(
+      (failure) =>
+          Get.snackbar('Error', 'Failed to remove provider: ${failure.message}', snackPosition: SnackPosition.BOTTOM),
+      (_) {
+        Get.snackbar('Success', 'Provider removed successfully', snackPosition: SnackPosition.BOTTOM);
+        getMyProviders(); // Refresh the list
+      },
+    );
   }
 }
