@@ -12,9 +12,11 @@ class ImmunizationRepositoryImpl implements ImmunizationRepository {
   const ImmunizationRepositoryImpl(this.dataSource);
 
   @override
-  Future<Either<Failure, List<Immunization>>> getAllImmunizationEntries() async {
+  Future<Either<Failure, List<Immunization>>> getAllImmunizationEntries({
+    required String uid,
+  }) async {
     try {
-      final result = await dataSource.getAllImmunizations();
+      final result = await dataSource.getAllImmunizations(uid: uid);
       return right(result);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -24,9 +26,13 @@ class ImmunizationRepositoryImpl implements ImmunizationRepository {
   }
 
   @override
-  Future<Either<Failure, void>> createImmunizationEntry(Immunization immunization) async {
+  Future<Either<Failure, void>> createImmunizationEntry(
+    Immunization immunization,
+  ) async {
     try {
-      await dataSource.createImmunizationEntry(ImmunizationModel.fromEntity(immunization));
+      await dataSource.createImmunizationEntry(
+        ImmunizationModel.fromEntity(immunization),
+      );
       return right(null);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -52,9 +58,15 @@ class ImmunizationRepositoryImpl implements ImmunizationRepository {
     required String id,
     required String title,
     required String body,
+    required String? providerId,
   }) async {
     try {
-      final response = await dataSource.updateImmunizationEntry(id: id, title: title, body: body);
+      final response = await dataSource.updateImmunizationEntry(
+        id: id,
+        title: title,
+        body: body,
+        providerId: providerId,
+      );
       return right(response);
     } on ServerException catch (e) {
       return left(Failure(e.message));

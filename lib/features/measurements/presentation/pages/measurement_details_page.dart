@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
+import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/common/widgets/loader.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/measurements/domain/entites/preset_measurement.dart';
@@ -13,8 +14,9 @@ import 'package:uuid/uuid.dart';
 import 'package:healthyways/features/measurements/domain/entites/measurement_entry.dart';
 
 class MeasurementDetailsPage extends StatefulWidget {
-  static route(PresetMeasurement measurement) =>
-      MaterialPageRoute(builder: (context) => MeasurementDetailsPage(measurement: measurement));
+  static route(PresetMeasurement measurement) => MaterialPageRoute(
+    builder: (context) => MeasurementDetailsPage(measurement: measurement),
+  );
 
   final PresetMeasurement measurement;
   const MeasurementDetailsPage({super.key, required this.measurement});
@@ -27,6 +29,9 @@ class _MeasurementDetailsPageState extends State<MeasurementDetailsPage> {
   final MeasurementController _measurementController = Get.find();
   final AppProfileController _appProfileController = Get.find();
 
+  bool get isPatient =>
+      _appProfileController.profile.data!.selectedRole == Role.patient;
+
   @override
   void initState() {
     _loadEntries();
@@ -35,7 +40,7 @@ class _MeasurementDetailsPageState extends State<MeasurementDetailsPage> {
 
   void _loadEntries() {
     _measurementController.getMeasurementEntries(
-      patientId: _appProfileController.profile.data!.uid,
+      // patientId: _appProfileController.profile.data!.uid,
       measurementId: widget.measurement.id,
     );
   }
@@ -55,14 +60,22 @@ class _MeasurementDetailsPageState extends State<MeasurementDetailsPage> {
                 TextField(
                   controller: valueController,
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(labelText: 'Value (${widget.measurement.unit})'),
+                  decoration: InputDecoration(
+                    labelText: 'Value (${widget.measurement.unit})',
+                  ),
                 ),
                 SizedBox(height: 12),
-                TextField(controller: noteController, decoration: InputDecoration(labelText: 'Note (optional)')),
+                TextField(
+                  controller: noteController,
+                  decoration: InputDecoration(labelText: 'Note (optional)'),
+                ),
               ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel'),
+              ),
               ElevatedButton(
                 onPressed: () async {
                   final value = valueController.text.trim();
@@ -80,7 +93,9 @@ class _MeasurementDetailsPageState extends State<MeasurementDetailsPage> {
                     createdAt: DateTime.now(),
                   );
 
-                  await _measurementController.addMeasurementEntry(measurementEntry: entry);
+                  await _measurementController.addMeasurementEntry(
+                    measurementEntry: entry,
+                  );
 
                   Navigator.pop(context); // Close dialog
                 },
@@ -98,20 +113,59 @@ class _MeasurementDetailsPageState extends State<MeasurementDetailsPage> {
         title: Text(widget.measurement.title),
         backgroundColor: AppPallete.backgroundColor2,
         actions: [
-          IconButton(
-            onPressed: () => Navigator.push(context, MeasurementSettingsPage.route(measurement: widget.measurement)),
-            icon: Icon(Icons.settings),
-          ),
-          IconButton(onPressed: _showAddMeasurementEntryDialog, icon: Icon(CupertinoIcons.add_circled)),
+          if (isPatient)
+            IconButton(
+              onPressed:
+                  () => Navigator.push(
+                    context,
+                    MeasurementSettingsPage.route(
+                      measurement: widget.measurement,
+                    ),
+                  ),
+              icon: Icon(Icons.settings),
+            ),
+          Obx(() {
+            final access = _measurementController.measurementAccess.value;
+            if (access == null || !access.isAllowed) return SizedBox.shrink();
+            return IconButton(
+              onPressed: _showAddMeasurementEntryDialog,
+              icon: Icon(CupertinoIcons.add_circled),
+            );
+          }),
         ],
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Obx(() {
           if (_measurementController.measurementEntries.isLoading) {
             return Loader();
           } else if (_measurementController.measurementEntries.hasError) {
-            return Center(child: Text(_measurementController.measurementEntries.error!.message));
+            final access = _measurementController.measurementAccess.value;
+
+            // Check if it's due to denied access
+            if (access != null && !access.isAllowed) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.lock_outline, size: 48, color: Colors.grey),
+                    SizedBox(height: 12),
+                    Text(
+                      access.message,
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return Center(
+              child: Text(
+                _measurementController.measurementEntries.error!.message,
+              ),
+            );
           }
 
           final entries = _measurementController.measurementEntries.data ?? [];
@@ -123,7 +177,9 @@ class _MeasurementDetailsPageState extends State<MeasurementDetailsPage> {
                 separatorBuilder: (context, index) => Divider(),
                 itemBuilder: (context, index) {
                   final measurementEntry = entries[index];
-                  return MeasurementEntryCard(measurementEntry: measurementEntry);
+                  return MeasurementEntryCard(
+                    measurementEntry: measurementEntry,
+                  );
                 },
               );
         }),

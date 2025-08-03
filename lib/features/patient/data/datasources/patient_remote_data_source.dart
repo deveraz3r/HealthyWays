@@ -15,12 +15,23 @@ abstract class PatientRemoteDataSource {
   Future<PatientProfileModel?> getPatientProfileById(String uid);
   Future<void> updatePatientProfile(PatientProfileModel profile);
   Future<List<PatientProfileModel>> getAllPatients();
-  Future<void> updateVisibilitySettings({required String featureId, required Visibility visibility});
+  Future<void> updateVisibilitySettings({
+    required String featureId,
+    required Visibility visibility,
+  });
   Future<List<MedicationModel>> getAllMedications();
-  Future<void> addMeasurementEntry({required MeasurementEntryModel measurementEntry});
+  Future<void> addMeasurementEntry({
+    required MeasurementEntryModel measurementEntry,
+  });
   Future<MedicineModel> getMedicineById({required String id});
-  Future<void> toggleMedicationStatusById({required String id, DateTime? timeTaken});
-  Future<List<MeasurementEntryModel>> getMeasurementEntries({required String patientId, required String measurementId});
+  Future<void> toggleMedicationStatusById({
+    required String id,
+    DateTime? timeTaken,
+  });
+  Future<List<MeasurementEntryModel>> getMeasurementEntries({
+    required String patientId,
+    required String measurementId,
+  });
 
   Future<List<String>> getMyProviders();
   Future<void> addMyProvider(String providerId);
@@ -31,13 +42,20 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
   final AppProfileController appProfileController;
   final SupabaseClient supabaseClient;
 
-  PatientRemoteDataSourceImpl({required this.appProfileController, required this.supabaseClient});
+  PatientRemoteDataSourceImpl({
+    required this.appProfileController,
+    required this.supabaseClient,
+  });
 
   @override
   Future<PatientProfileModel?> getPatientProfileById(String uid) async {
     try {
       final response =
-          await supabaseClient.from(SupabaseTables.fullPatientProfilesView).select().eq("uid", uid).single();
+          await supabaseClient
+              .from(SupabaseTables.fullPatientProfilesView)
+              .select()
+              .eq("uid", uid)
+              .single();
 
       if (response.isEmpty) {
         return null;
@@ -69,16 +87,24 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
   @override
   Future<List<PatientProfileModel>> getAllPatients() async {
     try {
-      final response = await supabaseClient.from(SupabaseTables.patientsTable).select();
+      final response =
+          await supabaseClient
+              .from(SupabaseTables.fullPatientProfilesView)
+              .select();
 
-      return (response as List).map((data) => PatientProfileModel.fromJson(data)).toList();
+      return (response as List)
+          .map((data) => PatientProfileModel.fromJson(data))
+          .toList();
     } catch (e) {
       throw ServerException(e.toString());
     }
   }
 
   @override
-  Future<void> updateVisibilitySettings({required String featureId, required Visibility visibility}) async {
+  Future<void> updateVisibilitySettings({
+    required String featureId,
+    required Visibility visibility,
+  }) async {
     try {
       print("calling Update Visiblity settings with featureId $featureId");
       final profile = appProfileController.profile.data as PatientProfileModel;
@@ -89,36 +115,47 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
       switch (featureId) {
         case 'allergies':
           updatedProfile = profile.copyWith(allergiesVisibility: visibility);
-          updateMap[PatientsTableColumns.allergiesVisibility.name] = visibility.toJson();
+          updateMap[PatientsTableColumns.allergiesVisibility.name] =
+              visibility.toJson();
           break;
         case 'immunizations':
-          updatedProfile = profile.copyWith(immunizationsVisibility: visibility);
-          updateMap[PatientsTableColumns.immunizationVisibility.name] = visibility.toJson();
+          updatedProfile = profile.copyWith(
+            immunizationsVisibility: visibility,
+          );
+          updateMap[PatientsTableColumns.immunizationVisibility.name] =
+              visibility.toJson();
           break;
         case 'labReports':
           updatedProfile = profile.copyWith(labReportsVisibility: visibility);
-          updateMap[PatientsTableColumns.labReportsVisibility.name] = visibility.toJson();
+          updateMap[PatientsTableColumns.labReportsVisibility.name] =
+              visibility.toJson();
           break;
         case 'diaries':
           updatedProfile = profile.copyWith(diariesVisibility: visibility);
-          updateMap[PatientsTableColumns.diaryVisibility.name] = visibility.toJson();
+          updateMap[PatientsTableColumns.diaryVisibility.name] =
+              visibility.toJson();
           break;
         case 'measurements':
           updatedProfile = profile.copyWith(measurementsVisibility: visibility);
-          updateMap[PatientsTableColumns.measurementsVisibility.name] = visibility.toJson();
+          updateMap[PatientsTableColumns.measurementsVisibility.name] =
+              visibility.toJson();
           break;
         case 'global':
           updatedProfile = profile.copyWith(globalVisibility: visibility);
           print("Before: ${updatedProfile.globalVisibility.type}");
           print(PatientsTableColumns.globalVisibility.name);
-          updateMap[PatientsTableColumns.globalVisibility.name] = visibility.toJson();
+          updateMap[PatientsTableColumns.globalVisibility.name] =
+              visibility.toJson();
           break;
         default:
           throw ServerException('Invalid feature ID');
       }
 
       // Update Supabase
-      await supabaseClient.from(SupabaseTables.patientsTable).update(updateMap).eq("uid", profile.uid);
+      await supabaseClient
+          .from(SupabaseTables.patientsTable)
+          .update(updateMap)
+          .eq("uid", profile.uid);
 
       // Update local controller
       appProfileController.updateProfile(updatedProfile);
@@ -135,16 +172,22 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
           .select()
           .order('allocatedTime', ascending: true);
 
-      return (response as List).map((med) => MedicationModel.fromJson(med)).toList();
+      return (response as List)
+          .map((med) => MedicationModel.fromJson(med))
+          .toList();
     } catch (e) {
       throw ServerException(e.toString());
     }
   }
 
   @override
-  Future<void> addMeasurementEntry({required MeasurementEntryModel measurementEntry}) async {
+  Future<void> addMeasurementEntry({
+    required MeasurementEntryModel measurementEntry,
+  }) async {
     try {
-      await supabaseClient.from('measurementEntries').insert(measurementEntry.toMap());
+      await supabaseClient
+          .from('measurementEntries')
+          .insert(measurementEntry.toMap());
     } catch (e) {
       material.debugPrint('Error adding measurement: $e');
       throw ServerException(e.toString());
@@ -154,7 +197,12 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
   @override
   Future<MedicineModel> getMedicineById({required String id}) async {
     try {
-      final response = await supabaseClient.from(SupabaseTables.medicinesTable).select().eq('id', id).single();
+      final response =
+          await supabaseClient
+              .from(SupabaseTables.medicinesTable)
+              .select()
+              .eq('id', id)
+              .single();
 
       return MedicineModel.fromJson(response);
     } catch (e) {
@@ -163,11 +211,18 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
   }
 
   @override
-  Future<void> toggleMedicationStatusById({required String id, DateTime? timeTaken}) async {
+  Future<void> toggleMedicationStatusById({
+    required String id,
+    DateTime? timeTaken,
+  }) async {
     try {
       // First get the current status
       final currentStatus =
-          await supabaseClient.from(SupabaseTables.medicationsTable).select('isTaken').eq('id', id).single();
+          await supabaseClient
+              .from(SupabaseTables.medicationsTable)
+              .select('isTaken')
+              .eq('id', id)
+              .single();
 
       final bool isCurrentlyTaken = currentStatus['isTaken'] as bool;
 
@@ -176,7 +231,10 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
           .from(SupabaseTables.medicationsTable)
           .update({
             'isTaken': !isCurrentlyTaken, // Toggle the status
-            'takenTime': !isCurrentlyTaken ? timeTaken?.toIso8601String() : null, // Clear time if unmarking
+            'takenTime':
+                !isCurrentlyTaken
+                    ? timeTaken?.toIso8601String()
+                    : null, // Clear time if unmarking
           })
           .eq('id', id);
     } catch (e) {
@@ -248,7 +306,8 @@ class PatientRemoteDataSourceImpl implements PatientRemoteDataSource {
   Future<void> removeMyProvider(String providerId) async {
     try {
       final profile = appProfileController.profile.data as PatientProfileModel;
-      final updatedProviders = profile.myProviders.where((id) => id != providerId).toList();
+      final updatedProviders =
+          profile.myProviders.where((id) => id != providerId).toList();
 
       await supabaseClient
           .from(SupabaseTables.patientsTable)

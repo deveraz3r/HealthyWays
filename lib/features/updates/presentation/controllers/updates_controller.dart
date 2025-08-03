@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
+import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/common/entites/assigned_medication_report.dart';
 import 'package:healthyways/core/common/entites/medicine.dart';
 import 'package:healthyways/core/common/entites/patient_profile.dart';
 import 'package:healthyways/core/controller/controller_state_manager.dart';
 import 'package:healthyways/core/error/failure.dart';
-import 'package:healthyways/core/usecase/usecase.dart';
 import 'package:healthyways/features/medication/domain/usecases/get_medicine_by_id.dart';
 import 'package:healthyways/features/patient/domain/usecases/get_patient_by_id.dart';
 import 'package:healthyways/features/updates/domain/usecases/get_all_medication_schedule_report.dart';
@@ -22,12 +22,18 @@ class UpdatesController extends GetxController {
        _getPatientById = getPatientById,
        _getMedicineById = getMedicineById;
 
-  final allMedicationScheduleReport = StateController<Failure, List<AssignedMedicationReport>>();
+  final allMedicationScheduleReport =
+      StateController<Failure, List<AssignedMedicationReport>>();
 
-  Future<void> getAllMedicationScheduleReports() async {
+  Future<void> getAllMedicationScheduleReports({
+    required String uid,
+    required Role role,
+  }) async {
     allMedicationScheduleReport.setLoading();
 
-    final result = await _getAllMedicationScheduleReport(NoParams());
+    final result = await _getAllMedicationScheduleReport(
+      GetAllMedicationScheduleReportsParams(uid: uid, role: Role.patient),
+    );
 
     result.fold(
       (failure) => allMedicationScheduleReport.setError(failure),

@@ -3,10 +3,15 @@ import 'package:healthyways/features/allergies/data/models/allergie_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class AllergiesRemoteDataSource {
-  Future<List<AllergieModel>> getAllAllergieEntries();
+  Future<List<AllergieModel>> getAllAllergieEntries({required String uid});
   Future<void> createAllergieEntry(AllergieModel allergie);
   Future<void> deleteAllergieEntry(String id);
-  Future<AllergieModel> updateAllergieEntry({required String id, required String title, required String body});
+  Future<AllergieModel> updateAllergieEntry({
+    required String id,
+    required String title,
+    required String body,
+    String? providerId,
+  });
 }
 
 class AllergiesRemoteDataSourceImpl implements AllergiesRemoteDataSource {
@@ -16,7 +21,9 @@ class AllergiesRemoteDataSourceImpl implements AllergiesRemoteDataSource {
   @override
   Future<void> createAllergieEntry(AllergieModel allergie) async {
     try {
-      await client.from(SupabaseTables.allergiesTable).insert(allergie.toJson());
+      await client
+          .from(SupabaseTables.allergiesTable)
+          .insert(allergie.toJson());
     } catch (e) {
       throw (e.toString());
     }
@@ -32,11 +39,18 @@ class AllergiesRemoteDataSourceImpl implements AllergiesRemoteDataSource {
   }
 
   @override
-  Future<List<AllergieModel>> getAllAllergieEntries() async {
+  Future<List<AllergieModel>> getAllAllergieEntries({
+    required String uid,
+  }) async {
     try {
-      final response = await client.from(SupabaseTables.allergiesTable).select().order('lastUpdated', ascending: false);
+      final response = await client
+          .from(SupabaseTables.allergiesTable)
+          .select()
+          .eq('patientId', uid)
+          .order('lastUpdated', ascending: false);
 
-      final List<AllergieModel> allAllergies = response.map((e) => AllergieModel.fromJson(e)).toList();
+      final List<AllergieModel> allAllergies =
+          response.map((e) => AllergieModel.fromJson(e)).toList();
 
       return allAllergies;
     } catch (e) {
@@ -45,14 +59,29 @@ class AllergiesRemoteDataSourceImpl implements AllergiesRemoteDataSource {
   }
 
   @override
-  Future<AllergieModel> updateAllergieEntry({required String id, required String title, required String body}) async {
+  Future<AllergieModel> updateAllergieEntry({
+    required String id,
+    required String title,
+    required String body,
+    String? providerId,
+  }) async {
     try {
       await client
           .from(SupabaseTables.allergiesTable)
-          .update({"title": title, "body": body, "lastUpdated": DateTime.now()})
+          .update({
+            "title": title,
+            "body": body,
+            "lastUpdated": DateTime.now(),
+            "providerId": providerId,
+          })
           .eq("id", id);
 
-      final response = await client.from(SupabaseTables.allergiesTable).select().eq("id", id).single();
+      final response =
+          await client
+              .from(SupabaseTables.allergiesTable)
+              .select()
+              .eq("id", id)
+              .single();
 
       return AllergieModel.fromJson(response);
     } catch (e) {

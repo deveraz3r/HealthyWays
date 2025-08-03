@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
-import 'package:healthyways/core/common/custom_types/visibility.dart' as custom_visibility;
+import 'package:healthyways/core/common/custom_types/visibility.dart'
+    as custom_visibility;
 import 'package:healthyways/core/common/custom_types/visibility_type.dart';
 import 'package:healthyways/core/common/entites/patient_profile.dart';
 import 'package:healthyways/core/common/models/patient_profile_model.dart';
@@ -10,8 +11,9 @@ import 'package:healthyways/features/measurements/domain/entites/preset_measurem
 import 'package:healthyways/features/measurements/presentation/controllers/measurement_controller.dart';
 
 class VisibilityDetailsPage extends StatefulWidget {
-  static route(PresetMeasurement measurement) =>
-      MaterialPageRoute(builder: (context) => VisibilityDetailsPage(measurement: measurement));
+  static route(PresetMeasurement measurement) => MaterialPageRoute(
+    builder: (context) => VisibilityDetailsPage(measurement: measurement),
+  );
 
   final PresetMeasurement measurement;
 
@@ -41,13 +43,19 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
     _customAccessList.addAll(myMeasurement.visiblity.customAccess);
   }
 
-  void _updateVisibility({VisibilityType? newType, List<String>? newCustomList}) {
-    final patientProfile = _profileController.profile.data as PatientProfileModel;
+  void _updateVisibility({
+    VisibilityType? newType,
+    List<String>? newCustomList,
+  }) {
+    final patientProfile =
+        _profileController.profile.data as PatientProfileModel;
 
     final newVisibility = custom_visibility.Visibility(
       type: newType ?? _selectedType,
       customAccess:
-          (newType ?? _selectedType) == VisibilityType.custom ? (newCustomList ?? _customAccessList.toList()) : [],
+          (newType ?? _selectedType) == VisibilityType.custom
+              ? (newCustomList ?? _customAccessList.toList())
+              : [],
     );
 
     // Update local profile state
@@ -59,12 +67,16 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
           return m;
         }).toList();
 
-    final updatedProfile = patientProfile.copyWith(myMeasurements: updatedMeasurements);
+    final updatedProfile = patientProfile.copyWith(
+      myMeasurements: updatedMeasurements,
+    );
     _profileController.updateProfile(updatedProfile);
 
     // Sync to Supabase
     _measurementController.measurementVisibility.setData(newVisibility);
-    _measurementController.updateMeasurementVisibility(measurementId: widget.measurement.id);
+    _measurementController.updateMeasurementVisibility(
+      measurementId: widget.measurement.id,
+    );
   }
 
   void _showAddEmailDialog() {
@@ -76,17 +88,24 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
             title: const Text('Add Email Access'),
             content: TextField(
               controller: emailController,
-              decoration: const InputDecoration(hintText: 'Enter email address'),
+              decoration: const InputDecoration(
+                hintText: 'Enter email address',
+              ),
               keyboardType: TextInputType.emailAddress,
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
               ElevatedButton(
                 onPressed: () {
                   final email = emailController.text.trim();
                   if (email.isNotEmpty && email.contains('@')) {
                     _customAccessList.add(email);
-                    _updateVisibility(newCustomList: _customAccessList.toList());
+                    _updateVisibility(
+                      newCustomList: _customAccessList.toList(),
+                    );
                     Navigator.pop(ctx);
                   }
                 },
@@ -135,20 +154,33 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Visibility Settings'), backgroundColor: AppPallete.backgroundColor2),
+      appBar: AppBar(
+        title: const Text('Visibility Settings'),
+        backgroundColor: AppPallete.backgroundColor2,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Who can see this measurement?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+            const Text(
+              'Who can see this measurement?',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
             const SizedBox(height: 8),
             DropdownButtonFormField<VisibilityType>(
               value: _selectedType,
               items:
                   VisibilityType.values
-                      .where((type) => type != VisibilityType.disabled) // Filter out disabled option
-                      .map((type) => DropdownMenuItem(value: type, child: Text(_getVisibilityTypeTitle(type))))
+                      .where(
+                        (type) => type != VisibilityType.disabled,
+                      ) // Filter out disabled option
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value: type,
+                          child: Text(_getVisibilityTypeTitle(type)),
+                        ),
+                      )
                       .toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -170,16 +202,30 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Custom Access List', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                  IconButton(onPressed: _showAddEmailDialog, icon: const Icon(Icons.add_circle_outline)),
+                  const Text(
+                    'Custom Access List',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                  IconButton(
+                    onPressed: _showAddEmailDialog,
+                    icon: const Icon(Icons.add_circle_outline),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
               Obx(() {
                 if (_customAccessList.isEmpty) {
-                  return const Text('Add people with private access', style: TextStyle(color: Colors.grey));
+                  return const Text(
+                    'Add people with private access',
+                    style: TextStyle(color: Colors.grey),
+                  );
                 }
-                return Column(children: _customAccessList.map((email) => _buildEmailCard(email)).toList());
+                return Column(
+                  children:
+                      _customAccessList
+                          .map((email) => _buildEmailCard(email))
+                          .toList(),
+                );
               }),
             ],
           ],
@@ -195,7 +241,13 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
       decoration: BoxDecoration(
         color: AppPallete.backgroundColor2,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 3))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
         border: Border.all(color: Colors.black12),
       ),
       child: Row(
@@ -204,7 +256,10 @@ class _VisibilityDetailsPageState extends State<VisibilityDetailsPage> {
           const SizedBox(width: 10),
           Expanded(child: Text(email, style: const TextStyle(fontSize: 15))),
           IconButton(
-            icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
+            icon: const Icon(
+              Icons.remove_circle_outline,
+              color: Colors.redAccent,
+            ),
             onPressed: () => _removeCustomAccess(email),
           ),
         ],

@@ -1,3 +1,4 @@
+import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/common/entites/assigned_medication_report.dart';
 import 'package:healthyways/core/common/models/assigned_medication_model.dart';
 import 'package:healthyways/core/common/models/medicine_schedule_model.dart';
@@ -11,15 +12,33 @@ class UpdatesRemoteDataSourceImpl implements IUpdatesRemoteDataSource {
   UpdatesRemoteDataSourceImpl(this.client);
 
   @override
-  Future<List<AssignedMedicationReport>> getAllMedicationScheduleReport() async {
+  Future<List<AssignedMedicationReport>> getAllMedicationScheduleReport({
+    required String uid,
+    required Role role,
+  }) async {
     try {
+      String associatedCol;
+
+      switch (role) {
+        case Role.doctor:
+        case Role.pharmacist:
+          associatedCol = "assignedBy";
+          break;
+        case Role.patient:
+          associatedCol = "assignedTo";
+          break;
+      }
+
       // Step 1: Get all assigned medications
       final assignedResponse = await client
           .from(SupabaseTables.assignedMedications)
           .select()
+          .eq(associatedCol, uid)
           .order('startDate', ascending: false);
 
-      final assignedMedications = List<Map<String, dynamic>>.from(assignedResponse);
+      final assignedMedications = List<Map<String, dynamic>>.from(
+        assignedResponse,
+      );
 
       // Step 2: For each assigned medication, fetch its medicine schedules
       List<AssignedMedicationReportModel> results = [];
@@ -33,10 +52,15 @@ class UpdatesRemoteDataSourceImpl implements IUpdatesRemoteDataSource {
             .select()
             .eq('assignedMedicationId', assignedId);
 
-        final medicineSchedules = List<Map<String, dynamic>>.from(medicineSchedulesResponse);
+        final medicineSchedules = List<Map<String, dynamic>>.from(
+          medicineSchedulesResponse,
+        );
 
         // Parse the medicine schedules
-        final schedules = medicineSchedules.map((json) => MedicineScheduleModel.fromJson(json)).toList();
+        final schedules =
+            medicineSchedules
+                .map((json) => MedicineScheduleModel.fromJson(json))
+                .toList();
 
         // Build the report
         final report = AssignedMedicationReportModel(

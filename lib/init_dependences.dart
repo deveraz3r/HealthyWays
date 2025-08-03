@@ -27,6 +27,7 @@ import 'package:healthyways/features/diary/presentation/controllers/diary_contro
 import 'package:healthyways/features/doctor/data/datasources/doctor_remote_data_source.dart';
 import 'package:healthyways/features/doctor/data/repositories/doctor_repository_impl.dart';
 import 'package:healthyways/features/doctor/domain/repositories/doctor_repository.dart';
+import 'package:healthyways/features/doctor/domain/usecases/add_my_patient.dart';
 import 'package:healthyways/features/doctor/domain/usecases/get_all_doctors.dart';
 import 'package:healthyways/features/doctor/domain/usecases/get_doctor_by_id.dart';
 import 'package:healthyways/features/doctor/domain/usecases/update_doctor_profile.dart';
@@ -42,7 +43,8 @@ import 'package:healthyways/features/measurements/data/datasources/measurement_r
 import 'package:healthyways/features/measurements/data/repositories/measurement_repository_impl.dart';
 import 'package:healthyways/features/measurements/domain/repositories/measurement_repository.dart';
 import 'package:healthyways/features/measurements/domain/usecases/add_measurement_entry.dart';
-import 'package:healthyways/features/patient/domain/usecases/add_measurement_entry.dart' as patient;
+import 'package:healthyways/features/patient/domain/usecases/add_measurement_entry.dart'
+    as patient;
 import 'package:healthyways/features/measurements/domain/usecases/get_all_measurements.dart';
 import 'package:healthyways/features/measurements/domain/usecases/get_measurement_entries.dart';
 import 'package:healthyways/features/measurements/domain/usecases/get_measurement_visibility.dart';
@@ -130,14 +132,24 @@ void _initAuth() {
   );
 
   // Repositories
-  serviceLocator.registerFactory<AuthRepository>(() => AuthRepositoryImpl(serviceLocator<AuthRemoteDataSource>()));
+  serviceLocator.registerFactory<AuthRepository>(
+    () => AuthRepositoryImpl(serviceLocator<AuthRemoteDataSource>()),
+  );
 
   // Use cases
   serviceLocator
-    ..registerFactory<UserSignIn>(() => UserSignIn(serviceLocator<AuthRepository>()))
-    ..registerFactory<UserSignUp>(() => UserSignUp(serviceLocator<AuthRepository>()))
-    ..registerFactory<UserSignOut>(() => UserSignOut(serviceLocator<AuthRepository>()))
-    ..registerFactory<CurrentProfile>(() => CurrentProfile(serviceLocator<AuthRepository>()));
+    ..registerFactory<UserSignIn>(
+      () => UserSignIn(serviceLocator<AuthRepository>()),
+    )
+    ..registerFactory<UserSignUp>(
+      () => UserSignUp(serviceLocator<AuthRepository>()),
+    )
+    ..registerFactory<UserSignOut>(
+      () => UserSignOut(serviceLocator<AuthRepository>()),
+    )
+    ..registerFactory<CurrentProfile>(
+      () => CurrentProfile(serviceLocator<AuthRepository>()),
+    );
 
   // App level controller
   serviceLocator.registerLazySingleton(() => AppProfileController());
@@ -170,25 +182,45 @@ void _initPatient() {
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllPatients>(() => GetAllPatients(serviceLocator<PatientRepository>()))
-    ..registerFactory<GetPatientById>(() => GetPatientById(serviceLocator<PatientRepository>()))
-    ..registerFactory<UpdatePatientProfile>(() => UpdatePatientProfile(serviceLocator<PatientRepository>()))
+    ..registerFactory<GetAllPatients>(
+      () => GetAllPatients(serviceLocator<PatientRepository>()),
+    )
+    ..registerFactory<GetPatientById>(
+      () => GetPatientById(serviceLocator<PatientRepository>()),
+    )
+    ..registerFactory<UpdatePatientProfile>(
+      () => UpdatePatientProfile(serviceLocator<PatientRepository>()),
+    )
     // ..registerFactory<UpdateGlobalVisibility>(() => UpdateGlobalVisibility(serviceLocator<PatientRepository>()))
-    ..registerFactory<PatientGetAllMedications>(() => PatientGetAllMedications(serviceLocator<PatientRepository>()))
-    ..registerFactory<UpdateVisibilitySettings>(() => UpdateVisibilitySettings(serviceLocator<PatientRepository>()))
+    ..registerFactory<PatientGetAllMedications>(
+      () => PatientGetAllMedications(serviceLocator<PatientRepository>()),
+    )
+    ..registerFactory<UpdateVisibilitySettings>(
+      () => UpdateVisibilitySettings(serviceLocator<PatientRepository>()),
+    )
     ..registerFactory<patient.AddMeasurementEntry>(
       () => patient.AddMeasurementEntry(serviceLocator<PatientRepository>()),
     )
-    ..registerFactory<PatientGetMedicineById>(() => PatientGetMedicineById(serviceLocator<PatientRepository>()))
+    ..registerFactory<PatientGetMedicineById>(
+      () => PatientGetMedicineById(serviceLocator<PatientRepository>()),
+    )
     ..registerFactory<PatientToggleMedicationStatusById>(
-      () => PatientToggleMedicationStatusById(serviceLocator<PatientRepository>()),
+      () => PatientToggleMedicationStatusById(
+        serviceLocator<PatientRepository>(),
+      ),
     )
     ..registerFactory<PatientGetMeasurementEntries>(
       () => PatientGetMeasurementEntries(serviceLocator<PatientRepository>()),
     )
-    ..registerFactory<GetMyProviders>(() => GetMyProviders(serviceLocator<PatientRepository>()))
-    ..registerFactory<AddMyProvider>(() => AddMyProvider(serviceLocator<PatientRepository>()))
-    ..registerFactory<RemoveMyProvider>(() => RemoveMyProvider(serviceLocator<PatientRepository>()));
+    ..registerFactory<GetMyProviders>(
+      () => GetMyProviders(serviceLocator<PatientRepository>()),
+    )
+    ..registerFactory<AddMyProvider>(
+      () => AddMyProvider(serviceLocator<PatientRepository>()),
+    )
+    ..registerFactory<RemoveMyProvider>(
+      () => RemoveMyProvider(serviceLocator<PatientRepository>()),
+    );
 
   // Controller
   serviceLocator.registerSingleton<PatientController>(
@@ -201,8 +233,10 @@ void _initPatient() {
       getAllMedications: serviceLocator<PatientGetAllMedications>(),
       addMeasurementEntry: serviceLocator<patient.AddMeasurementEntry>(),
       getMedicineById: serviceLocator<PatientGetMedicineById>(),
-      toggleMedicationStatusById: serviceLocator<PatientToggleMedicationStatusById>(),
-      patientGetMeasurementEntries: serviceLocator<PatientGetMeasurementEntries>(),
+      toggleMedicationStatusById:
+          serviceLocator<PatientToggleMedicationStatusById>(),
+      patientGetMeasurementEntries:
+          serviceLocator<PatientGetMeasurementEntries>(),
 
       getMyProviders: serviceLocator<GetMyProviders>(),
       addMyProvider: serviceLocator<AddMyProvider>(),
@@ -220,18 +254,27 @@ void _initMedications() {
 
   // Repositories
   serviceLocator.registerFactory<MedicationRepository>(
-    () => MedicationRepositoryImpl(serviceLocator<MedicationsRemoteDataSource>()),
+    () =>
+        MedicationRepositoryImpl(serviceLocator<MedicationsRemoteDataSource>()),
   );
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllMedicines>(() => GetAllMedicines(serviceLocator<MedicationRepository>()))
-    ..registerFactory<GetAllMedications>(() => GetAllMedications(serviceLocator<MedicationRepository>()))
-    ..registerFactory<AddAssignedMedication>(() => AddAssignedMedication(serviceLocator<MedicationRepository>()))
+    ..registerFactory<GetAllMedicines>(
+      () => GetAllMedicines(serviceLocator<MedicationRepository>()),
+    )
+    ..registerFactory<GetAllMedications>(
+      () => GetAllMedications(serviceLocator<MedicationRepository>()),
+    )
+    ..registerFactory<AddAssignedMedication>(
+      () => AddAssignedMedication(serviceLocator<MedicationRepository>()),
+    )
     ..registerFactory<ToggleMedicationStatusById>(
       () => ToggleMedicationStatusById(serviceLocator<MedicationRepository>()),
     )
-    ..registerFactory<GetMedicineById>(() => GetMedicineById(serviceLocator<MedicationRepository>()));
+    ..registerFactory<GetMedicineById>(
+      () => GetMedicineById(serviceLocator<MedicationRepository>()),
+    );
 
   // App-level controller
   serviceLocator.registerSingleton(() => AppMedicationsController());
@@ -250,26 +293,44 @@ void _initMedications() {
 void _initMeasurements() {
   // Data sources
   serviceLocator.registerFactory<MeasurementRemoteDataSource>(
-    () => MeasurementRemoteDataSourceImpl(serviceLocator<SupabaseClient>(), serviceLocator<AppProfileController>()),
+    () => MeasurementRemoteDataSourceImpl(
+      serviceLocator<SupabaseClient>(),
+      serviceLocator<AppProfileController>(),
+    ),
   );
 
   // Repositories
   serviceLocator.registerFactory<MeasurementRepository>(
-    () => MeasurementRepositoryImpl(serviceLocator<MeasurementRemoteDataSource>()),
+    () => MeasurementRepositoryImpl(
+      serviceLocator<MeasurementRemoteDataSource>(),
+    ),
   );
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllMeasurements>(() => GetAllMeasurements(serviceLocator<MeasurementRepository>()))
-    ..registerFactory<GetMyMeasurements>(() => GetMyMeasurements(serviceLocator<MeasurementRepository>()))
-    ..registerFactory<GetMeasurementEntries>(() => GetMeasurementEntries(serviceLocator<MeasurementRepository>()))
-    ..registerFactory<AddMeasurementEntry>(() => AddMeasurementEntry(serviceLocator<MeasurementRepository>()))
-    ..registerFactory<GetMeasurementVisibility>(() => GetMeasurementVisibility(serviceLocator<MeasurementRepository>()))
+    ..registerFactory<GetAllMeasurements>(
+      () => GetAllMeasurements(serviceLocator<MeasurementRepository>()),
+    )
+    ..registerFactory<GetMyMeasurements>(
+      () => GetMyMeasurements(serviceLocator<MeasurementRepository>()),
+    )
+    ..registerFactory<GetMeasurementEntries>(
+      () => GetMeasurementEntries(serviceLocator<MeasurementRepository>()),
+    )
+    ..registerFactory<AddMeasurementEntry>(
+      () => AddMeasurementEntry(serviceLocator<MeasurementRepository>()),
+    )
+    ..registerFactory<GetMeasurementVisibility>(
+      () => GetMeasurementVisibility(serviceLocator<MeasurementRepository>()),
+    )
     ..registerFactory<UpdateMeasurementVisibility>(
-      () => UpdateMeasurementVisibility(serviceLocator<MeasurementRepository>()),
+      () =>
+          UpdateMeasurementVisibility(serviceLocator<MeasurementRepository>()),
     )
     ..registerFactory<UpdateMyMeasurementReminderSettings>(
-      () => UpdateMyMeasurementReminderSettings(serviceLocator<MeasurementRepository>()),
+      () => UpdateMyMeasurementReminderSettings(
+        serviceLocator<MeasurementRepository>(),
+      ),
     )
     ..registerFactory<ToggleMyMeasurementStatus>(
       () => ToggleMyMeasurementStatus(serviceLocator<MeasurementRepository>()),
@@ -284,9 +345,11 @@ void _initMeasurements() {
       toggleMyMeasurementStatus: serviceLocator<ToggleMyMeasurementStatus>(),
       addMeasurementEntry: serviceLocator<AddMeasurementEntry>(),
       getMeasurementVisibility: serviceLocator<GetMeasurementVisibility>(),
-      updateMeasurementVisibility: serviceLocator<UpdateMeasurementVisibility>(),
+      updateMeasurementVisibility:
+          serviceLocator<UpdateMeasurementVisibility>(),
       appProfileController: serviceLocator<AppProfileController>(),
-      updateMyMeasurementReminderSettings: serviceLocator<UpdateMyMeasurementReminderSettings>(),
+      updateMyMeasurementReminderSettings:
+          serviceLocator<UpdateMyMeasurementReminderSettings>(),
     ),
   );
 }
@@ -313,7 +376,8 @@ void _initUpdates() {
   // Controller
   serviceLocator.registerSingleton<UpdatesController>(
     UpdatesController(
-      getAllMedicationScheduleReport: serviceLocator<GetAllMedicationScheduleReport>(),
+      getAllMedicationScheduleReport:
+          serviceLocator<GetAllMedicationScheduleReport>(),
       getPatientById: serviceLocator<GetPatientById>(),
       getMedicineById: serviceLocator<GetMedicineById>(),
     ),
@@ -333,13 +397,23 @@ void _initDoctor() {
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllDoctors>(() => GetAllDoctors(serviceLocator<DoctorRepository>()))
-    ..registerFactory<GetDoctorById>(() => GetDoctorById(serviceLocator<DoctorRepository>()))
-    ..registerFactory<UpdateDoctorProfile>(() => UpdateDoctorProfile(serviceLocator<DoctorRepository>()));
+    ..registerFactory<AddMyPatient>(
+      () => AddMyPatient(serviceLocator<DoctorRepository>()),
+    )
+    ..registerFactory<GetAllDoctors>(
+      () => GetAllDoctors(serviceLocator<DoctorRepository>()),
+    )
+    ..registerFactory<GetDoctorById>(
+      () => GetDoctorById(serviceLocator<DoctorRepository>()),
+    )
+    ..registerFactory<UpdateDoctorProfile>(
+      () => UpdateDoctorProfile(serviceLocator<DoctorRepository>()),
+    );
 
   // Controller
   serviceLocator.registerSingleton<DoctorController>(
     DoctorController(
+      addMyPatient: serviceLocator<AddMyPatient>(),
       getAllDoctors: serviceLocator<GetAllDoctors>(),
       getDoctorById: serviceLocator<GetDoctorById>(),
       updateDoctorProfile: serviceLocator<UpdateDoctorProfile>(),
@@ -355,14 +429,21 @@ void _initPharmacist() {
 
   // Repositories
   serviceLocator.registerFactory<PharmacistRepository>(
-    () => PharmacistRepositoryImpl(serviceLocator<PharmacistRemoteDataSource>()),
+    () =>
+        PharmacistRepositoryImpl(serviceLocator<PharmacistRemoteDataSource>()),
   );
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllPharmacists>(() => GetAllPharmacists(serviceLocator<PharmacistRepository>()))
-    ..registerFactory<GetPharmacistById>(() => GetPharmacistById(serviceLocator<PharmacistRepository>()))
-    ..registerFactory<UpdatePharmacistProfile>(() => UpdatePharmacistProfile(serviceLocator<PharmacistRepository>()));
+    ..registerFactory<GetAllPharmacists>(
+      () => GetAllPharmacists(serviceLocator<PharmacistRepository>()),
+    )
+    ..registerFactory<GetPharmacistById>(
+      () => GetPharmacistById(serviceLocator<PharmacistRepository>()),
+    )
+    ..registerFactory<UpdatePharmacistProfile>(
+      () => UpdatePharmacistProfile(serviceLocator<PharmacistRepository>()),
+    );
 
   // Controller
   serviceLocator.registerSingleton<PharmacistController>(
@@ -381,14 +462,24 @@ void _initDiary() {
   );
 
   // Repositories
-  serviceLocator.registerFactory<DiaryRepository>(() => DiaryRepositoryImpl(serviceLocator<DiaryRemoteDataSource>()));
+  serviceLocator.registerFactory<DiaryRepository>(
+    () => DiaryRepositoryImpl(serviceLocator<DiaryRemoteDataSource>()),
+  );
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllDiaryEntries>(() => GetAllDiaryEntries(serviceLocator<DiaryRepository>()))
-    ..registerFactory<UpdateDiaryEntry>(() => UpdateDiaryEntry(serviceLocator<DiaryRepository>()))
-    ..registerFactory<CreateDiaryEntry>(() => CreateDiaryEntry(serviceLocator<DiaryRepository>()))
-    ..registerFactory<DeleteDiaryEntry>(() => DeleteDiaryEntry(serviceLocator<DiaryRepository>()));
+    ..registerFactory<GetAllDiaryEntries>(
+      () => GetAllDiaryEntries(serviceLocator<DiaryRepository>()),
+    )
+    ..registerFactory<UpdateDiaryEntry>(
+      () => UpdateDiaryEntry(serviceLocator<DiaryRepository>()),
+    )
+    ..registerFactory<CreateDiaryEntry>(
+      () => CreateDiaryEntry(serviceLocator<DiaryRepository>()),
+    )
+    ..registerFactory<DeleteDiaryEntry>(
+      () => DeleteDiaryEntry(serviceLocator<DiaryRepository>()),
+    );
 
   // Controller
   serviceLocator.registerSingleton<DiaryController>(
@@ -410,7 +501,9 @@ void _initImmunization() {
 
   // Repositories
   serviceLocator.registerFactory<ImmunizationRepository>(
-    () => ImmunizationRepositoryImpl(serviceLocator<ImmunizationRemoteDataSource>()),
+    () => ImmunizationRepositoryImpl(
+      serviceLocator<ImmunizationRemoteDataSource>(),
+    ),
   );
 
   // Use cases
@@ -418,9 +511,15 @@ void _initImmunization() {
     ..registerFactory<GetAllImmunizationEntries>(
       () => GetAllImmunizationEntries(serviceLocator<ImmunizationRepository>()),
     )
-    ..registerFactory<CreateImmunizationEntry>(() => CreateImmunizationEntry(serviceLocator<ImmunizationRepository>()))
-    ..registerFactory<UpdateImmunizationEntry>(() => UpdateImmunizationEntry(serviceLocator<ImmunizationRepository>()))
-    ..registerFactory<DeleteImmunizationEntry>(() => DeleteImmunizationEntry(serviceLocator<ImmunizationRepository>()));
+    ..registerFactory<CreateImmunizationEntry>(
+      () => CreateImmunizationEntry(serviceLocator<ImmunizationRepository>()),
+    )
+    ..registerFactory<UpdateImmunizationEntry>(
+      () => UpdateImmunizationEntry(serviceLocator<ImmunizationRepository>()),
+    )
+    ..registerFactory<DeleteImmunizationEntry>(
+      () => DeleteImmunizationEntry(serviceLocator<ImmunizationRepository>()),
+    );
 
   // Controller
   serviceLocator.registerSingleton<ImmunizationController>(
@@ -447,10 +546,18 @@ void _initAllergies() {
 
   // Use cases
   serviceLocator
-    ..registerFactory<GetAllAllergyEntries>(() => GetAllAllergyEntries(serviceLocator<AllergiesRepository>()))
-    ..registerFactory<CreateAllergyEntry>(() => CreateAllergyEntry(serviceLocator<AllergiesRepository>()))
-    ..registerFactory<UpdateAllergyEntry>(() => UpdateAllergyEntry(serviceLocator<AllergiesRepository>()))
-    ..registerFactory<DeleteAllergyEntry>(() => DeleteAllergyEntry(serviceLocator<AllergiesRepository>()));
+    ..registerFactory<GetAllAllergyEntries>(
+      () => GetAllAllergyEntries(serviceLocator<AllergiesRepository>()),
+    )
+    ..registerFactory<CreateAllergyEntry>(
+      () => CreateAllergyEntry(serviceLocator<AllergiesRepository>()),
+    )
+    ..registerFactory<UpdateAllergyEntry>(
+      () => UpdateAllergyEntry(serviceLocator<AllergiesRepository>()),
+    )
+    ..registerFactory<DeleteAllergyEntry>(
+      () => DeleteAllergyEntry(serviceLocator<AllergiesRepository>()),
+    );
 
   // Controller
   serviceLocator.registerSingleton<AllergiesController>(

@@ -17,16 +17,28 @@ import 'package:healthyways/core/common/entites/patient_profile.dart' as p;
 
 abstract interface class MeasurementRemoteDataSource {
   Future<List<PresetMeasurementModel>> getAllMeasurements();
-  Future<List<PresetMeasurementModel>> getMyMeasurements();
-  Future<List<MeasurementEntry>> getMeasurementEntries({required String patientId, required String measurementId});
-  Future<void> addMeasurement({required MeasurementEntryModel measurementEntry});
+  Future<List<PresetMeasurementModel>> getMyMeasurements({
+    required PatientProfileModel patientProfile,
+  });
+  Future<List<MeasurementEntry>> getMeasurementEntries({
+    required String patientId,
+    required String measurementId,
+  });
+  Future<void> addMeasurement({
+    required MeasurementEntryModel measurementEntry,
+  });
   Future<void> toggleMyMeasurementStatus({required String measurementId});
 
-  Future<void> updateMyMeasurementReminderSettings({required MyMeasurements myMeasurement});
+  Future<void> updateMyMeasurementReminderSettings({
+    required MyMeasurements myMeasurement,
+  });
 
   //Visibility
   Future<Visibility> getMeasurementVisibility({required String measurementId});
-  Future<void> updateMeasurementVisibility({required String measurementId, required Visibility visibility});
+  Future<void> updateMeasurementVisibility({
+    required String measurementId,
+    required Visibility visibility,
+  });
 }
 
 class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
@@ -34,27 +46,41 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
   final AppProfileController appProfileController;
   //TODO: find a way to remove appProfileController form data source
 
-  MeasurementRemoteDataSourceImpl(this.supabaseClient, this.appProfileController);
+  MeasurementRemoteDataSourceImpl(
+    this.supabaseClient,
+    this.appProfileController,
+  );
 
   @override
   Future<List<PresetMeasurementModel>> getAllMeasurements() async {
     try {
-      final response = await supabaseClient.from(SupabaseTables.measurementsTable).select();
-      return (response as List).map((e) => PresetMeasurementModel.fromJson(e)).toList();
+      final response =
+          await supabaseClient.from(SupabaseTables.measurementsTable).select();
+      return (response as List)
+          .map((e) => PresetMeasurementModel.fromJson(e))
+          .toList();
     } catch (e) {
       throw ServerException(e.toString());
     }
   }
 
   @override
-  Future<List<PresetMeasurementModel>> getMyMeasurements() async {
+  Future<List<PresetMeasurementModel>> getMyMeasurements({
+    required PatientProfileModel patientProfile,
+  }) async {
     try {
-      final profile = appProfileController.profile.data as p.PatientProfile;
-      final myMeasurementIds = profile.myMeasurements.where((e) => e.isActive).map((e) => e.id).toSet();
+      // final profile = appProfileController.profile.data as p.PatientProfile;
+      final myMeasurementIds =
+          patientProfile.myMeasurements
+              .where((e) => e.isActive)
+              .map((e) => e.id)
+              .toSet();
 
       final allMeasurements = await getAllMeasurements();
 
-      return allMeasurements.where((measurement) => myMeasurementIds.contains(measurement.id)).toList();
+      return allMeasurements
+          .where((measurement) => myMeasurementIds.contains(measurement.id))
+          .toList();
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -83,8 +109,14 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
           patientId: map['patientId'] ?? '',
           value: map['value']?.toString() ?? '0',
           note: map['note'] ?? '',
-          lastUpdated: map['lastUpdated'] != null ? DateTime.parse(map['lastUpdated']) : DateTime.now(),
-          createdAt: map['createdAt'] != null ? DateTime.parse(map['lastUpdated']) : DateTime.now(),
+          lastUpdated:
+              map['lastUpdated'] != null
+                  ? DateTime.parse(map['lastUpdated'])
+                  : DateTime.now(),
+          createdAt:
+              map['createdAt'] != null
+                  ? DateTime.parse(map['lastUpdated'])
+                  : DateTime.now(),
         );
       }).toList();
     } catch (e, stackTrace) {
@@ -94,9 +126,13 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
   }
 
   @override
-  Future<void> addMeasurement({required MeasurementEntryModel measurementEntry}) async {
+  Future<void> addMeasurement({
+    required MeasurementEntryModel measurementEntry,
+  }) async {
     try {
-      await supabaseClient.from('measurementEntries').insert(measurementEntry.toMap());
+      await supabaseClient
+          .from('measurementEntries')
+          .insert(measurementEntry.toMap());
     } catch (e) {
       debugPrint('Error adding measurement: $e');
       throw ServerException(e.toString());
@@ -104,23 +140,32 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
   }
 
   @override
-  Future<void> toggleMyMeasurementStatus({required String measurementId}) async {
+  Future<void> toggleMyMeasurementStatus({
+    required String measurementId,
+  }) async {
     try {
       final profile = appProfileController.profile.data as p.PatientProfile;
 
       final updatedMeasurements = [...profile.myMeasurements];
-      final index = updatedMeasurements.indexWhere((m) => m.id == measurementId);
+      final index = updatedMeasurements.indexWhere(
+        (m) => m.id == measurementId,
+      );
 
       if (index != -1) {
         final existing = updatedMeasurements[index];
 
-        updatedMeasurements[index] = existing.copyWith(isActive: !existing.isActive);
+        updatedMeasurements[index] = existing.copyWith(
+          isActive: !existing.isActive,
+        );
       } else {
         // Adding a new measurement with sensible defaults
         updatedMeasurements.add(
           MyMeasurements(
             id: measurementId,
-            visiblity: Visibility(type: VisibilityType.private, customAccess: []),
+            visiblity: Visibility(
+              type: VisibilityType.private,
+              customAccess: [],
+            ),
             isActive: true,
             time: const material.TimeOfDay(hour: 12, minute: 0),
             repetitionType: RepetitionType.none,
@@ -133,11 +178,19 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
       // Update Supabase
       await supabaseClient
           .from(SupabaseTables.patientsTable)
-          .update({PatientsTableColumns.myMeasurements.name: updatedMeasurements.map((m) => m.toJson()).toList()})
+          .update({
+            PatientsTableColumns.myMeasurements.name:
+                updatedMeasurements.map((m) => m.toJson()).toList(),
+          })
           .eq('uid', profile.uid);
 
       // Re-fetch updated profile
-      final response = await supabaseClient.from('fullPatientProfilesView').select().eq('uid', profile.uid).single();
+      final response =
+          await supabaseClient
+              .from('fullPatientProfilesView')
+              .select()
+              .eq('uid', profile.uid)
+              .single();
 
       final updatedProfile = PatientProfileModel.fromJson(response);
       appProfileController.updateProfile(updatedProfile);
@@ -147,11 +200,15 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
   }
 
   @override
-  Future<Visibility> getMeasurementVisibility({required String measurementId}) async {
+  Future<Visibility> getMeasurementVisibility({
+    required String measurementId,
+  }) async {
     try {
       final profile = appProfileController.profile.data as p.PatientProfile;
 
-      final MyMeasurements myMeasurement = profile.myMeasurements.firstWhere((e) => e.id == measurementId);
+      final MyMeasurements myMeasurement = profile.myMeasurements.firstWhere(
+        (e) => e.id == measurementId,
+      );
 
       return myMeasurement.visiblity;
     } catch (e) {
@@ -161,12 +218,17 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
   }
 
   @override
-  Future<void> updateMeasurementVisibility({required String measurementId, required Visibility visibility}) async {
+  Future<void> updateMeasurementVisibility({
+    required String measurementId,
+    required Visibility visibility,
+  }) async {
     try {
       final profile = appProfileController.profile.data as p.PatientProfile;
 
       final updatedMeasurements = [...profile.myMeasurements];
-      final index = updatedMeasurements.indexWhere((m) => m.id == measurementId);
+      final index = updatedMeasurements.indexWhere(
+        (m) => m.id == measurementId,
+      );
 
       if (index != -1) {
         updatedMeasurements[index].visiblity = visibility;
@@ -176,11 +238,19 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
 
       await supabaseClient
           .from(SupabaseTables.patientsTable)
-          .update({PatientsTableColumns.myMeasurements.name: updatedMeasurements.map((m) => m.toJson()).toList()})
+          .update({
+            PatientsTableColumns.myMeasurements.name:
+                updatedMeasurements.map((m) => m.toJson()).toList(),
+          })
           .eq('uid', profile.uid);
 
       // Re-fetch updated profile
-      final response = await supabaseClient.from('fullPatientProfilesView').select().eq('uid', profile.uid).single();
+      final response =
+          await supabaseClient
+              .from('fullPatientProfilesView')
+              .select()
+              .eq('uid', profile.uid)
+              .single();
 
       final updatedProfile = PatientProfileModel.fromJson(response);
       appProfileController.updateProfile(updatedProfile);
@@ -191,13 +261,17 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
   }
 
   @override
-  Future<void> updateMyMeasurementReminderSettings({required MyMeasurements myMeasurement}) async {
+  Future<void> updateMyMeasurementReminderSettings({
+    required MyMeasurements myMeasurement,
+  }) async {
     try {
       final profile = appProfileController.profile.data as p.PatientProfile;
 
       // Create updated measurements list
       final updatedMeasurements = [...profile.myMeasurements];
-      final index = updatedMeasurements.indexWhere((m) => m.id == myMeasurement.id);
+      final index = updatedMeasurements.indexWhere(
+        (m) => m.id == myMeasurement.id,
+      );
 
       if (index != -1) {
         // Update the measurement with new reminder settings
@@ -214,11 +288,19 @@ class MeasurementRemoteDataSourceImpl implements MeasurementRemoteDataSource {
       // Update in Supabase
       await supabaseClient
           .from(SupabaseTables.patientsTable)
-          .update({PatientsTableColumns.myMeasurements.name: updatedMeasurements.map((m) => m.toJson()).toList()})
+          .update({
+            PatientsTableColumns.myMeasurements.name:
+                updatedMeasurements.map((m) => m.toJson()).toList(),
+          })
           .eq('uid', profile.uid);
 
       // Re-fetch updated profile
-      final response = await supabaseClient.from('fullPatientProfilesView').select().eq('uid', profile.uid).single();
+      final response =
+          await supabaseClient
+              .from('fullPatientProfilesView')
+              .select()
+              .eq('uid', profile.uid)
+              .single();
 
       final updatedProfile = PatientProfileModel.fromJson(response);
       appProfileController.updateProfile(updatedProfile);

@@ -4,12 +4,20 @@ import 'package:healthyways/core/usecase/usecase.dart';
 import 'package:healthyways/features/diary/domain/entites/diary.dart';
 import 'package:healthyways/features/diary/domain/repositories/diary_repository.dart';
 
-class GetAllDiaryEntries implements UseCase<List<Diary>, NoParams> {
+class GetAllDiaryEntriesParams {
+  final String patientId;
+  GetAllDiaryEntriesParams({required this.patientId});
+}
+
+class GetAllDiaryEntries
+    implements UseCase<List<Diary>, GetAllDiaryEntriesParams> {
   DiaryRepository repository;
   GetAllDiaryEntries(this.repository);
 
   @override
-  Future<Either<Failure, List<Diary>>> call(params) async {
-    return await repository.getAllDiaryEntries();
+  Future<Either<Failure, List<Diary>>> call(
+    GetAllDiaryEntriesParams params,
+  ) async {
+    return await repository.getAllDiaryEntries(params.patientId);
   }
 }

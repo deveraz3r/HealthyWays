@@ -30,9 +30,13 @@ class PatientRepositoryImpl implements PatientRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updatePatientProfile(PatientProfile profile) async {
+  Future<Either<Failure, void>> updatePatientProfile(
+    PatientProfile profile,
+  ) async {
     try {
-      await remoteDataSource.updatePatientProfile(profile as PatientProfileModel);
+      await remoteDataSource.updatePatientProfile(
+        profile as PatientProfileModel,
+      );
       return const Right(null);
     } on ServerException catch (e) {
       return Left(Failure(e.message));
@@ -55,7 +59,10 @@ class PatientRepositoryImpl implements PatientRepository {
     required Visibility visibility,
   }) async {
     try {
-      await remoteDataSource.updateVisibilitySettings(featureId: featureId, visibility: visibility);
+      await remoteDataSource.updateVisibilitySettings(
+        featureId: featureId,
+        visibility: visibility,
+      );
       return const Right(null);
     } on ServerException catch (e) {
       return Left(Failure(e.message));
@@ -73,7 +80,9 @@ class PatientRepositoryImpl implements PatientRepository {
   }
 
   @override
-  Future<Either<Failure, void>> addMeasurementEntry({required MeasurementEntry measurementEntry}) async {
+  Future<Either<Failure, void>> addMeasurementEntry({
+    required MeasurementEntry measurementEntry,
+  }) async {
     try {
       final measurementModel = MeasurementEntryModel(
         id: measurementEntry.id,
@@ -85,7 +94,9 @@ class PatientRepositoryImpl implements PatientRepository {
         createdAt: measurementEntry.createdAt,
       );
 
-      await remoteDataSource.addMeasurementEntry(measurementEntry: measurementModel);
+      await remoteDataSource.addMeasurementEntry(
+        measurementEntry: measurementModel,
+      );
       return right(null);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -93,7 +104,9 @@ class PatientRepositoryImpl implements PatientRepository {
   }
 
   @override
-  Future<Either<Failure, Medicine>> getMedicineById({required String id}) async {
+  Future<Either<Failure, Medicine>> getMedicineById({
+    required String id,
+  }) async {
     try {
       final medicine = await remoteDataSource.getMedicineById(id: id);
       return Right(medicine);
@@ -103,9 +116,15 @@ class PatientRepositoryImpl implements PatientRepository {
   }
 
   @override
-  Future<Either<Failure, void>> toggleMedicationStatusById({required String id, DateTime? timeTaken}) async {
+  Future<Either<Failure, void>> toggleMedicationStatusById({
+    required String id,
+    DateTime? timeTaken,
+  }) async {
     try {
-      await remoteDataSource.toggleMedicationStatusById(id: id, timeTaken: timeTaken);
+      await remoteDataSource.toggleMedicationStatusById(
+        id: id,
+        timeTaken: timeTaken,
+      );
       return right(null);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -118,7 +137,10 @@ class PatientRepositoryImpl implements PatientRepository {
     required String measurementId,
   }) async {
     try {
-      final response = await remoteDataSource.getMeasurementEntries(patientId: patientId, measurementId: measurementId);
+      final response = await remoteDataSource.getMeasurementEntries(
+        patientId: patientId,
+        measurementId: measurementId,
+      );
 
       return right(response);
     } on ServerException catch (e) {

@@ -12,9 +12,11 @@ class AllergiesRepositoryImpl implements AllergiesRepository {
   const AllergiesRepositoryImpl(this.dataSource);
 
   @override
-  Future<Either<Failure, List<Allergy>>> getAllAllergieEntries() async {
+  Future<Either<Failure, List<Allergy>>> getAllAllergieEntries({
+    required String uid,
+  }) async {
     try {
-      final result = await dataSource.getAllAllergieEntries();
+      final result = await dataSource.getAllAllergieEntries(uid: uid);
       return right(result);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -52,9 +54,15 @@ class AllergiesRepositoryImpl implements AllergiesRepository {
     required String id,
     required String title,
     required String body,
+    String? providerId,
   }) async {
     try {
-      final response = await dataSource.updateAllergieEntry(id: id, title: title, body: body);
+      final response = await dataSource.updateAllergieEntry(
+        id: id,
+        title: title,
+        body: body,
+        providerId: providerId,
+      );
       return right(response);
     } on ServerException catch (e) {
       return left(Failure(e.message));

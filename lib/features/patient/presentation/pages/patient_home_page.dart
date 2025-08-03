@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
+import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/diary/presentation/pages/diary_home_page.dart';
 import 'package:healthyways/features/medication/presentation/pages/add_new_medication_page.dart';
@@ -13,7 +14,8 @@ import 'package:healthyways/features/patient/presentation/widgets/patient_drawer
 import 'package:healthyways/features/updates/presentation/pages/updates_home_page.dart';
 
 class PatientHomePage extends StatefulWidget {
-  static route() => MaterialPageRoute(builder: (context) => const PatientHomePage());
+  static route() =>
+      MaterialPageRoute(builder: (context) => const PatientHomePage());
   const PatientHomePage({super.key});
 
   @override
@@ -31,16 +33,23 @@ class _PatientHomePageState extends State<PatientHomePage> {
     // DiaryHomePage(),
 
     // const PlaceholderPage(title: "Updates"),
-    UpdatesHomePage(),
+    UpdatesHomePage(
+      uid: Get.find<AppProfileController>().profile.data!.uid,
+      role: Role.patient,
+    ),
 
     const PlaceholderPage(title: "Med Cabinet"),
 
-    const PlaceholderPage(title: "More"), //Dummy placeholder as it is not a page
+    const PlaceholderPage(
+      title: "More",
+    ), //Dummy placeholder as it is not a page
   ];
 
   @override
   void initState() {
-    Get.find<PatientController>().getPatientById(Get.find<AppProfileController>().profile.data!.uid);
+    Get.find<PatientController>().getPatientById(
+      Get.find<AppProfileController>().profile.data!.uid,
+    );
     super.initState();
   }
 
@@ -67,10 +76,16 @@ class _PatientHomePageState extends State<PatientHomePage> {
         },
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.medication), label: "Pill Box"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.medication),
+            label: "Pill Box",
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chats"),
           BottomNavigationBarItem(icon: Icon(Icons.update), label: "Updates"),
-          BottomNavigationBarItem(icon: Icon(Icons.medical_services), label: "Med Cabinet"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.medical_services),
+            label: "Med Cabinet",
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: "More"),
         ],
       ),
@@ -101,7 +116,9 @@ List<Widget> _patientHomeActionWidget(BuildContext context, int index) {
           onPressed: () {
             Navigator.push(
               context,
-              AddNewMedicationPage.route(assignedTo: Get.find<AppProfileController>().profile.data!.uid),
+              AddNewMedicationPage.route(
+                assignedTo: Get.find<AppProfileController>().profile.data!.uid,
+              ),
             );
           },
         ),

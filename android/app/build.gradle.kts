@@ -8,7 +8,8 @@ plugins {
 android {
     namespace = "com.example.healthyways"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "29.0.13113456"    //flutter.ndkVersion
+    // ndkVersion = flutter.ndkVersion
+    ndkVersion = "29.0.13113456"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

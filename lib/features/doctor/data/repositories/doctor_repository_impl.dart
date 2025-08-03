@@ -6,6 +6,16 @@ import 'package:healthyways/core/common/models/doctor_profile_model.dart';
 import 'package:healthyways/features/doctor/domain/repositories/doctor_repository.dart';
 
 class DoctorRepositoryImpl implements DoctorRepository {
+  @override
+  Future<Either<Failure, void>> addMyPatient(String patientId) async {
+    try {
+      await remoteDataSource.addMyPatient(patientId);
+      return const Right(null);
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
+
   final DoctorRemoteDataSource remoteDataSource;
   DoctorRepositoryImpl(this.remoteDataSource);
 

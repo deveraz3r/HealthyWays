@@ -49,12 +49,21 @@ class PatientProfileModel extends PatientProfile {
       emergencyContacts: List<String>.from(json['emergencyContacts'] ?? []),
       myProviders: List<String>.from(json['myProviders'] ?? []),
       globalVisibility: Visibility.fromJson(json['globalVisibility'] ?? {}),
-      allergiesVisibility: Visibility.fromJson(json['allergiesVisibility'] ?? {}),
-      immunizationsVisibility: Visibility.fromJson(json['immunizationVisibility'] ?? {}),
-      labReportsVisibility: Visibility.fromJson(json['labReportsVisibility'] ?? {}),
+      allergiesVisibility: Visibility.fromJson(
+        json['allergiesVisibility'] ?? {},
+      ),
+      immunizationsVisibility: Visibility.fromJson(
+        json['immunizationVisibility'] ?? {},
+      ),
+      labReportsVisibility: Visibility.fromJson(
+        json['labReportsVisibility'] ?? {},
+      ),
       diariesVisibility: Visibility.fromJson(json['diariesVisibility'] ?? {}),
-      measurementsVisibility: Visibility.fromJson(json['measurementsVisibility'] ?? {}),
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      measurementsVisibility: Visibility.fromJson(
+        json['measurementsVisibility'] ?? {},
+      ),
+      createdAt:
+          json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
     );
   }
 
@@ -118,11 +127,37 @@ class PatientProfileModel extends PatientProfile {
       myProviders: myProviders ?? this.myProviders,
       globalVisibility: globalVisibility ?? this.globalVisibility,
       allergiesVisibility: allergiesVisibility ?? this.allergiesVisibility,
-      immunizationsVisibility: immunizationsVisibility ?? this.immunizationsVisibility,
+      immunizationsVisibility:
+          immunizationsVisibility ?? this.immunizationsVisibility,
       labReportsVisibility: labReportsVisibility ?? this.labReportsVisibility,
       diariesVisibility: diariesVisibility ?? this.diariesVisibility,
-      measurementsVisibility: measurementsVisibility ?? this.measurementsVisibility,
+      measurementsVisibility:
+          measurementsVisibility ?? this.measurementsVisibility,
       createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  static PatientProfileModel fromPatientProfile(PatientProfile profile) {
+    return PatientProfileModel(
+      uid: profile.uid,
+      email: profile.email,
+      fName: profile.fName,
+      lName: profile.lName,
+      gender: profile.gender,
+      preferedLanguage: profile.preferedLanguage,
+      selectedRole: profile.selectedRole,
+      myMeasurements: profile.myMeasurements,
+      race: profile.race,
+      isMarried: profile.isMarried,
+      emergencyContacts: profile.emergencyContacts,
+      myProviders: profile.myProviders,
+      globalVisibility: profile.globalVisibility,
+      allergiesVisibility: profile.allergiesVisibility,
+      immunizationsVisibility: profile.immunizationsVisibility,
+      labReportsVisibility: profile.labReportsVisibility,
+      diariesVisibility: profile.diariesVisibility,
+      measurementsVisibility: profile.measurementsVisibility,
+      createdAt: profile.createdAt,
     );
   }
 }

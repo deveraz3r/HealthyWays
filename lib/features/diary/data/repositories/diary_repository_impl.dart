@@ -33,9 +33,11 @@ class DiaryRepositoryImpl implements DiaryRepository {
   }
 
   @override
-  Future<Either<Failure, List<Diary>>> getAllDiaryEntries() async {
+  Future<Either<Failure, List<Diary>>> getAllDiaryEntries(
+    String patientId,
+  ) async {
     try {
-      final response = await dataSource.getAllDiaryEntries();
+      final response = await dataSource.getAllDiaryEntries(patientId);
 
       return right(response);
     } on ServerException catch (e) {
@@ -50,7 +52,11 @@ class DiaryRepositoryImpl implements DiaryRepository {
     required String body,
   }) async {
     try {
-      final response = await dataSource.updateDiaryEntry(id: id, title: title, body: body);
+      final response = await dataSource.updateDiaryEntry(
+        id: id,
+        title: title,
+        body: body,
+      );
 
       return right(response);
     } on ServerException catch (e) {

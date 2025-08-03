@@ -1,13 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
+import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/measurements/presentation/controllers/measurement_controller.dart';
 import 'package:healthyways/features/measurements/presentation/pages/add_measurement_page.dart';
 import 'package:healthyways/features/measurements/presentation/widgets/my_measurement_card.dart';
 
 class MyMeasurementsPage extends StatefulWidget {
-  static route() => MaterialPageRoute(builder: (context) => MyMeasurementsPage());
+  static route() =>
+      MaterialPageRoute(builder: (context) => MyMeasurementsPage());
   const MyMeasurementsPage({super.key});
 
   @override
@@ -16,6 +19,10 @@ class MyMeasurementsPage extends StatefulWidget {
 
 class _MyMeasurementsPageState extends State<MyMeasurementsPage> {
   final MeasurementController _measurementController = Get.find();
+  final AppProfileController _appProfileController = Get.find();
+
+  bool get isPatient =>
+      _appProfileController.profile.data!.selectedRole == Role.patient;
 
   @override
   void initState() {
@@ -28,14 +35,17 @@ class _MyMeasurementsPageState extends State<MyMeasurementsPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppPallete.backgroundColor2,
-        title: const Text("My Trackers"),
+        title: const Text("Trackers"),
         actions: [
-          IconButton(
-            onPressed: () => Navigator.push(context, AddMeasurementPage.route()),
-            icon: const Icon(CupertinoIcons.add_circled),
-          ),
+          if (isPatient)
+            IconButton(
+              onPressed:
+                  () => Navigator.push(context, AddMeasurementPage.route()),
+              icon: const Icon(CupertinoIcons.add_circled),
+            ),
         ],
       ),
+
       body: Obx(() {
         final state = _measurementController.myMeasurements;
 
