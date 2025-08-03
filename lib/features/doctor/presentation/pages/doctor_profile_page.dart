@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/core/common/entites/doctor_profile.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
 import 'package:healthyways/features/doctor/presentation/controllers/doctor_controller.dart';
 import 'package:healthyways/core/common/models/doctor_profile_model.dart';
 
@@ -254,6 +255,27 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                     label: 'Bio',
                     fieldKey: 'bio',
                     maxLines: 3,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // Replace with actual logout logic
+                      // TODO: find a way to not use controller of another feature
+                      Get.find<AuthController>().signOut();
+                    },
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Logout'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppPallete.gradient1,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 14,
+                      ),
+                      textStyle: const TextStyle(fontSize: 16),
+                    ),
                   ),
                 ],
               ),

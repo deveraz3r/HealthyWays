@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/core/common/entites/patient_profile.dart';
+import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/features/patient/presentation/controllers/patient_controller.dart';
 import 'package:healthyways/features/patient/presentation/pages/patient_details_page.dart';
 import 'package:healthyways/features/patient/presentation/widgets/patient_card.dart';
 
-class AllPatientsPage extends StatefulWidget {
-  static route() => MaterialPageRoute(builder: (_) => const AllPatientsPage());
+class MyPatientsPage extends StatefulWidget {
+  static route() => MaterialPageRoute(builder: (_) => const MyPatientsPage());
 
-  const AllPatientsPage({super.key});
+  const MyPatientsPage({super.key});
 
   @override
-  State<AllPatientsPage> createState() => _AllPatientsPageState();
+  State<MyPatientsPage> createState() => _MyPatientsPageState();
 }
 
-class _AllPatientsPageState extends State<AllPatientsPage> {
+class _MyPatientsPageState extends State<MyPatientsPage> {
   final PatientController _patientController = Get.find();
+  final AppProfileController _appProfileController = Get.find();
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -34,9 +36,11 @@ class _AllPatientsPageState extends State<AllPatientsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUserUid = _appProfileController.profile.data!.uid;
+
     return Scaffold(
       // appBar: AppBar(
-      //   title: const Text('All Patients'),
+      //   title: const Text('My Patients'),
       //   backgroundColor: AppPallete.backgroundColor2,
       // ),
       body: Column(
@@ -47,7 +51,7 @@ class _AllPatientsPageState extends State<AllPatientsPage> {
               controller: _searchController,
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
-                hintText: 'Search all patients...',
+                hintText: 'Search my patients...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -69,11 +73,16 @@ class _AllPatientsPageState extends State<AllPatientsPage> {
                 );
               }
 
-              final List<PatientProfile> patients =
+              final List<PatientProfile> allPatients =
                   _patientController.allPatients.data ?? [];
 
+              final List<PatientProfile> myPatients =
+                  allPatients.where((patient) {
+                    return patient.myProviders.contains(currentUserUid);
+                  }).toList();
+
               final filteredPatients =
-                  patients.where((patient) {
+                  myPatients.where((patient) {
                     final query = _searchQuery.toLowerCase();
                     return patient.fName.toLowerCase().contains(query) ||
                         patient.lName.toLowerCase().contains(query) ||
@@ -82,7 +91,7 @@ class _AllPatientsPageState extends State<AllPatientsPage> {
                   }).toList();
 
               if (filteredPatients.isEmpty) {
-                return const Center(child: Text('No patients found'));
+                return const Center(child: Text('No patients found.'));
               }
 
               return ListView.builder(

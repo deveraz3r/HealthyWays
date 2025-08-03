@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/core/common/entites/patient_profile.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/allergies/presentation/controllers/allergie_controller.dart';
@@ -10,7 +11,6 @@ import 'package:healthyways/features/doctor/presentation/widgets/doctor_updates_
 import 'package:healthyways/features/immunization/presentation/controllers/immunization_controller.dart';
 import 'package:healthyways/features/immunization/presentation/pages/immunization_home_page.dart';
 import 'package:healthyways/features/measurements/presentation/controllers/measurement_controller.dart';
-import 'package:healthyways/features/measurements/presentation/pages/measurement_details_page.dart';
 import 'package:healthyways/features/measurements/presentation/pages/my_measurements_page.dart';
 import 'package:healthyways/features/medication/presentation/pages/add_new_medication_page.dart';
 
@@ -23,6 +23,9 @@ class PatientDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUserId = Get.find<AppProfileController>().profile.data!.uid;
+    final isProvider = patient.myProviders.contains(currentUserId);
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -196,6 +199,19 @@ class PatientDetailsPage extends StatelessWidget {
                     Icons.chat_bubble_outline_rounded,
                     () {
                       // TODO: Add chat navigation
+                    },
+                  ),
+
+                  _buildOptionTile(
+                    isProvider ? 'Remove Provider' : 'Add as Provider',
+                    isProvider ? Icons.person_remove : Icons.person_add,
+                    () {
+                      // TODO: Implement add/remove provider logic
+                      if (isProvider) {
+                        print('Remove provider logic goes here');
+                      } else {
+                        print('Add provider logic goes here');
+                      }
                     },
                   ),
                 ],
