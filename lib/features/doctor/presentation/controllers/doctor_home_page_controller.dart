@@ -5,6 +5,7 @@ import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/features/doctor/presentation/pages/doctor_profile_page.dart';
 import 'package:healthyways/features/patient/presentation/pages/all_patients_page.dart';
 import 'package:healthyways/features/patient/presentation/pages/my_patients_page.dart';
+import 'package:healthyways/features/permission_requests/presentation/pages/permission_request_page.dart';
 import 'package:healthyways/features/updates/presentation/pages/updates_home_page.dart';
 
 class DoctorHomePageController extends GetxController {
@@ -17,10 +18,11 @@ class DoctorHomePageController extends GetxController {
         MyPatientsPage(),
         // const PlaceholderPage(title: "My Providers"),
         const PlaceholderPage(title: "Chats"),
-        UpdatesHomePage(
-          uid: Get.find<AppProfileController>().profile.data!.uid,
-          role: Role.doctor,
-        ),
+        PermissionRequestsPage(),
+        // UpdatesHomePage(
+        //   uid: Get.find<AppProfileController>().profile.data!.uid,
+        //   role: Role.doctor,
+        // ),
         // const PlaceholderPage(title: "Updates"),
         DoctorProfilePage(),
         // const PlaceholderPage(title: "Profile"),

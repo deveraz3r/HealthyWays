@@ -2,8 +2,18 @@ import 'package:healthyways/core/common/entites/doctor_profile.dart';
 import 'package:healthyways/core/common/entites/patient_profile.dart';
 import 'package:healthyways/features/permission_requests/domain/entities/permission_request.dart';
 
+/// Extension to handle conversions between enum and string safely
 extension PermissionStatusExtension on PermissionStatus {
-  String toShortString() => toString().split('.').last;
+  String toShortString() {
+    switch (this) {
+      case PermissionStatus.accepted:
+        return 'accepted';
+      case PermissionStatus.rejected:
+        return 'rejected';
+      case PermissionStatus.pending:
+        return 'pending';
+    }
+  }
 
   static PermissionStatus fromString(String status) {
     switch (status.toLowerCase()) {
@@ -18,76 +28,78 @@ extension PermissionStatusExtension on PermissionStatus {
   }
 }
 
-class PermissionRequest {
-  final String id;
-  final String patientId;
-  final String doctorId;
-  final PermissionStatus status;
-  final DateTime requestedAt;
-
-  PermissionRequest({
-    required this.id,
-    required this.patientId,
-    required this.doctorId,
-    required this.status,
-    required this.requestedAt,
+class PermissionRequestModel extends PermissionRequest {
+  PermissionRequestModel({
+    required super.id,
+    required super.patientId,
+    required super.providerId,
+    required super.status,
+    required super.requestedAt,
+    required super.createdByRole,
   });
 
-  factory PermissionRequest.fromJson(Map<String, dynamic> json) {
-    return PermissionRequest(
+  /// Safely parses JSON into model
+  factory PermissionRequestModel.fromJson(Map<String, dynamic> json) {
+    return PermissionRequestModel(
       id: json['id'] ?? '',
       patientId: json['patientId'] ?? '',
-      doctorId: json['doctorId'] ?? '',
+      providerId: json['providerId'] ?? '',
       status: PermissionStatusExtension.fromString(json['status'] ?? 'pending'),
-      requestedAt: DateTime.parse(json['requestedAt']),
+      requestedAt:
+          json['requestedAt'] != null
+              ? DateTime.tryParse(json['requestedAt']) ?? DateTime.now()
+              : DateTime.now(),
+      createdByRole: json['createdByRole'] ?? '',
     );
   }
 
+  /// Converts model to JSON format
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'patientId': patientId,
-      'doctorId': doctorId,
+      'providerId': providerId,
       'status': status.toShortString(),
       'requestedAt': requestedAt.toIso8601String(),
+      'createdByRole': createdByRole,
     };
   }
 
-  PermissionRequest copyWith({
+  /// Creates a copy of the model with optional overrides
+  PermissionRequestModel copyWith({
     String? id,
     String? patientId,
-    String? doctorId,
+    String? providerId,
     PermissionStatus? status,
     DateTime? requestedAt,
+    String? createdByRole,
   }) {
-    return PermissionRequest(
+    return PermissionRequestModel(
       id: id ?? this.id,
       patientId: patientId ?? this.patientId,
-      doctorId: doctorId ?? this.doctorId,
+      providerId: providerId ?? this.providerId,
       status: status ?? this.status,
       requestedAt: requestedAt ?? this.requestedAt,
+      createdByRole: createdByRole ?? this.createdByRole,
     );
   }
 
-  /// Creates a PermissionRequest using patient and doctor profiles
-  static PermissionRequest fromProfiles({
-    required PatientProfile patient,
-    required DoctorProfile doctor,
-    required String requestId,
-    PermissionStatus status = PermissionStatus.pending,
-    DateTime? requestedAt,
-  }) {
-    return PermissionRequest(
-      id: requestId,
-      patientId: patient.uid,
-      doctorId: doctor.uid,
-      status: status,
-      requestedAt: requestedAt ?? DateTime.now(),
+  /// Converts a base class instance to a model
+  static PermissionRequestModel fromPermissionRequest(
+    PermissionRequest request,
+  ) {
+    return PermissionRequestModel(
+      id: request.id,
+      patientId: request.patientId,
+      providerId: request.providerId,
+      status: request.status,
+      requestedAt: request.requestedAt,
+      createdByRole: request.createdByRole,
     );
   }
 
   @override
   String toString() {
-    return 'PermissionRequest(id: $id, patientId: $patientId, doctorId: $doctorId, status: $status, requestedAt: $requestedAt)';
+    return 'PermissionRequestModel(id: $id, patientId: $patientId, providerId: $providerId, status: $status, requestedAt: $requestedAt, createdByRole: $createdByRole)';
   }
 }

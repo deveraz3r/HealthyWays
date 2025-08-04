@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:get/get.dart';
-import 'package:healthyways/core/common/controllers/app_medications_controller.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/features/allergies/presentation/controllers/allergie_controller.dart';
 import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
@@ -10,6 +9,7 @@ import 'package:healthyways/features/immunization/presentation/controllers/immun
 import 'package:healthyways/features/measurements/presentation/controllers/measurement_controller.dart';
 import 'package:healthyways/features/medication/presentation/controllers/medication_controller.dart';
 import 'package:healthyways/features/patient/presentation/controllers/patient_controller.dart';
+import 'package:healthyways/features/permission_requests/presentation/controllers/premission_request_controller.dart';
 import 'package:healthyways/features/pharmacist/presentation/controllers/pharmacist_controller.dart';
 import 'package:healthyways/features/updates/presentation/controllers/updates_controller.dart';
 import 'package:healthyways/init_dependences.dart';
@@ -31,4 +31,5 @@ void initializeControllers() {
   Get.put(serviceLocator<DiaryController>());
   Get.put(serviceLocator<ImmunizationController>());
   Get.put(serviceLocator<AllergiesController>());
+  Get.put(serviceLocator<PermissionRequestController>());
 }

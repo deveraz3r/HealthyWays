@@ -78,6 +78,14 @@ import 'package:healthyways/features/patient/domain/usecases/toggle_medication_s
 import 'package:healthyways/features/patient/domain/usecases/update_patient_profile.dart';
 import 'package:healthyways/features/patient/domain/usecases/update_visibility_settings.dart';
 import 'package:healthyways/features/patient/presentation/controllers/patient_controller.dart';
+import 'package:healthyways/features/permission_requests/data/datasources/permission_requests_remote_datasource.dart';
+import 'package:healthyways/features/permission_requests/data/repositories/premission_requests_repo_impl.dart';
+import 'package:healthyways/features/permission_requests/domain/repositories/premission_requests_repo.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/create_premission_request.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/get_incoming_permission_requests.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/get_outgoing_permission_requests.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/update_permission_status.dart';
+import 'package:healthyways/features/permission_requests/presentation/controllers/premission_request_controller.dart';
 import 'package:healthyways/features/pharmacist/data/datasources/pharmacist_remote_data_source.dart';
 import 'package:healthyways/features/pharmacist/data/repositores/pharmacist_profile_repository_impl.dart';
 import 'package:healthyways/features/pharmacist/domain/repositories/pharmacist_repository.dart';
@@ -123,6 +131,7 @@ Future<void> initDependencies() async {
   _initDiary();
   _initImmunization();
   _initAllergies();
+  _initPermissionRequest();
 }
 
 void _initAuth() {
@@ -567,6 +576,56 @@ void _initAllergies() {
       createAllergieEntry: serviceLocator<CreateAllergyEntry>(),
       updateAllergieEntry: serviceLocator<UpdateAllergyEntry>(),
       deleteAllergieEntry: serviceLocator<DeleteAllergyEntry>(),
+    ),
+  );
+}
+
+void _initPermissionRequest() {
+  // Data sources
+  serviceLocator.registerFactory<PermissionRequestRemoteDataSource>(
+    () =>
+        PermissionRequestRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+  );
+
+  // Repositories
+  serviceLocator.registerFactory<PermissionRequestRepository>(
+    () => PermissionRequestRepositoryImpl(
+      serviceLocator<PermissionRequestRemoteDataSource>(),
+    ),
+  );
+
+  // Use cases
+  serviceLocator
+    ..registerFactory<CreatePermissionRequest>(
+      () => CreatePermissionRequest(
+        serviceLocator<PermissionRequestRepository>(),
+      ),
+    )
+    ..registerFactory<GetIncomingPermissionRequests>(
+      () => GetIncomingPermissionRequests(
+        serviceLocator<PermissionRequestRepository>(),
+      ),
+    )
+    ..registerFactory<GetOutgoingPermissionRequests>(
+      () => GetOutgoingPermissionRequests(
+        serviceLocator<PermissionRequestRepository>(),
+      ),
+    )
+    ..registerFactory<UpdatePermissionStatus>(
+      () =>
+          UpdatePermissionStatus(serviceLocator<PermissionRequestRepository>()),
+    );
+
+  // Controller
+  serviceLocator.registerSingleton<PermissionRequestController>(
+    PermissionRequestController(
+      appProfileController: serviceLocator<AppProfileController>(),
+      createPermissionRequest: serviceLocator<CreatePermissionRequest>(),
+      getIncomingPermissionRequests:
+          serviceLocator<GetIncomingPermissionRequests>(),
+      getOutgoingPermissionRequests:
+          serviceLocator<GetOutgoingPermissionRequests>(),
+      updatePermissionStatus: serviceLocator<UpdatePermissionStatus>(),
     ),
   );
 }

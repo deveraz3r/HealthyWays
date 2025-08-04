@@ -23,4 +23,6 @@ class SupabaseTables {
   static String diaryTable = "diaries";
   static String immunizationTable = "immunizations";
   static String allergiesTable = "allergies";
+
+  static String permissionRequestsTable = "permissionRequests";
 }
