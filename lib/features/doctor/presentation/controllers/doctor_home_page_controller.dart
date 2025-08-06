@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/core/common/custom_types/role.dart';
+import 'package:healthyways/features/chat/presentation/pages/chat_rooms_page.dart';
 import 'package:healthyways/features/doctor/presentation/pages/doctor_profile_page.dart';
 import 'package:healthyways/features/patient/presentation/pages/all_patients_page.dart';
 import 'package:healthyways/features/patient/presentation/pages/my_patients_page.dart';
@@ -17,7 +18,8 @@ class DoctorHomePageController extends GetxController {
         // const DoctorMainScreen(),
         MyPatientsPage(),
         // const PlaceholderPage(title: "My Providers"),
-        const PlaceholderPage(title: "Chats"),
+        // const PlaceholderPage(title: "Chats"),
+        ChatRoomsPage(),
         PermissionRequestsPage(),
         // UpdatesHomePage(
         //   uid: Get.find<AppProfileController>().profile.data!.uid,

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/features/allergies/presentation/controllers/allergie_controller.dart';
 import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
+import 'package:healthyways/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:healthyways/features/diary/presentation/controllers/diary_controller.dart';
 import 'package:healthyways/features/doctor/presentation/controllers/doctor_controller.dart';
 import 'package:healthyways/features/immunization/presentation/controllers/immunization_controller.dart';
@@ -32,4 +33,5 @@ void initializeControllers() {
   Get.put(serviceLocator<ImmunizationController>());
   Get.put(serviceLocator<AllergiesController>());
   Get.put(serviceLocator<PermissionRequestController>());
+  Get.put(serviceLocator<ChatController>());
 }

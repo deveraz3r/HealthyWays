@@ -16,6 +16,18 @@ import 'package:healthyways/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:healthyways/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:healthyways/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
+import 'package:healthyways/features/chat/data/datasources/chat_remote_data_source.dart';
+import 'package:healthyways/features/chat/data/datasources/chat_remote_data_source_impl.dart';
+import 'package:healthyways/features/chat/data/repositories/chat_repository_impl.dart';
+import 'package:healthyways/features/chat/domain/repositories/chat_repository.dart';
+import 'package:healthyways/features/chat/domain/usecases/create_chat_room.dart';
+import 'package:healthyways/features/chat/domain/usecases/delete_message.dart';
+import 'package:healthyways/features/chat/domain/usecases/get_chat_room_by_participants.dart';
+import 'package:healthyways/features/chat/domain/usecases/get_chat_rooms_for_user.dart';
+import 'package:healthyways/features/chat/domain/usecases/get_messages_for_room.dart';
+import 'package:healthyways/features/chat/domain/usecases/mark_message_as_read.dart';
+import 'package:healthyways/features/chat/domain/usecases/send_message.dart';
+import 'package:healthyways/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:healthyways/features/diary/data/datasources/diary_remote_data_source.dart';
 import 'package:healthyways/features/diary/data/repositories/diary_repository_impl.dart';
 import 'package:healthyways/features/diary/domain/repositories/diary_repository.dart';
@@ -81,9 +93,12 @@ import 'package:healthyways/features/patient/presentation/controllers/patient_co
 import 'package:healthyways/features/permission_requests/data/datasources/permission_requests_remote_datasource.dart';
 import 'package:healthyways/features/permission_requests/data/repositories/premission_requests_repo_impl.dart';
 import 'package:healthyways/features/permission_requests/domain/repositories/premission_requests_repo.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/add_provider_id.dart';
 import 'package:healthyways/features/permission_requests/domain/usecases/create_premission_request.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/delete_permission_request.dart';
 import 'package:healthyways/features/permission_requests/domain/usecases/get_incoming_permission_requests.dart';
 import 'package:healthyways/features/permission_requests/domain/usecases/get_outgoing_permission_requests.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/get_profile_data_by_id.dart';
 import 'package:healthyways/features/permission_requests/domain/usecases/update_permission_status.dart';
 import 'package:healthyways/features/permission_requests/presentation/controllers/premission_request_controller.dart';
 import 'package:healthyways/features/pharmacist/data/datasources/pharmacist_remote_data_source.dart';
@@ -132,6 +147,7 @@ Future<void> initDependencies() async {
   _initImmunization();
   _initAllergies();
   _initPermissionRequest();
+  _initChatFeature();
 }
 
 void _initAuth() {
@@ -606,10 +622,21 @@ void _initPermissionRequest() {
         serviceLocator<PermissionRequestRepository>(),
       ),
     )
+    ..registerFactory<DeletePermissionRequest>(
+      () => DeletePermissionRequest(
+        serviceLocator<PermissionRequestRepository>(),
+      ),
+    )
+    ..registerFactory<GetProfileDataById>(
+      () => GetProfileDataById(serviceLocator<PermissionRequestRepository>()),
+    )
     ..registerFactory<GetOutgoingPermissionRequests>(
       () => GetOutgoingPermissionRequests(
         serviceLocator<PermissionRequestRepository>(),
       ),
+    )
+    ..registerFactory<AddProviderId>(
+      () => AddProviderId(serviceLocator<PermissionRequestRepository>()),
     )
     ..registerFactory<UpdatePermissionStatus>(
       () =>
@@ -626,6 +653,59 @@ void _initPermissionRequest() {
       getOutgoingPermissionRequests:
           serviceLocator<GetOutgoingPermissionRequests>(),
       updatePermissionStatus: serviceLocator<UpdatePermissionStatus>(),
+      getProfileDataById: serviceLocator<GetProfileDataById>(),
+      deletePermissionRequest: serviceLocator<DeletePermissionRequest>(),
+      addProviderToPatient: serviceLocator<AddProviderId>(),
+    ),
+  );
+}
+
+void _initChatFeature() {
+  // Data source
+  serviceLocator.registerFactory<ChatRemoteDataSource>(
+    () => ChatRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+  );
+
+  // Repository
+  serviceLocator.registerFactory<ChatRepository>(
+    () => ChatRepositoryImpl(serviceLocator<ChatRemoteDataSource>()),
+  );
+
+  // Use cases
+  serviceLocator
+    ..registerFactory<GetOrCreateChatRoom>(
+      () => GetOrCreateChatRoom(serviceLocator<ChatRepository>()),
+    )
+    ..registerFactory<GetChatRoomByParticipants>(
+      () => GetChatRoomByParticipants(serviceLocator<ChatRepository>()),
+    )
+    ..registerFactory<GetChatRoomsForUser>(
+      () => GetChatRoomsForUser(serviceLocator<ChatRepository>()),
+    )
+    ..registerFactory<SendMessage>(
+      () => SendMessage(serviceLocator<ChatRepository>()),
+    )
+    ..registerFactory<GetMessagesForRoom>(
+      () => GetMessagesForRoom(serviceLocator<ChatRepository>()),
+    )
+    ..registerFactory<MarkMessageAsRead>(
+      () => MarkMessageAsRead(serviceLocator<ChatRepository>()),
+    )
+    ..registerFactory<DeleteMessage>(
+      () => DeleteMessage(serviceLocator<ChatRepository>()),
+    );
+
+  // Controller
+  serviceLocator.registerSingleton<ChatController>(
+    ChatController(
+      profileController: serviceLocator<AppProfileController>(),
+      getOrCreateChatRoom: serviceLocator<GetOrCreateChatRoom>(),
+      // getChatRoomByParticipants: serviceLocator<GetChatRoomByParticipants>(),
+      getChatRoomsForUser: serviceLocator<GetChatRoomsForUser>(),
+      sendMessage: serviceLocator<SendMessage>(),
+      getMessagesForRoom: serviceLocator<GetMessagesForRoom>(),
+      markMessageAsRead: serviceLocator<MarkMessageAsRead>(),
+      deleteMessage: serviceLocator<DeleteMessage>(),
     ),
   );
 }

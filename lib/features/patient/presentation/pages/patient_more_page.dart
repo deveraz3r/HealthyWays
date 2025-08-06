@@ -16,7 +16,8 @@ class PatientMorePage extends StatelessWidget {
   static route() => MaterialPageRoute(builder: (context) => PatientMorePage());
   PatientMorePage({super.key});
 
-  final AppProfileController _appProfileController = Get.find<AppProfileController>();
+  final AppProfileController _appProfileController =
+      Get.find<AppProfileController>();
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +82,12 @@ class PatientMorePage extends StatelessWidget {
         'title': 'Add Medication',
         'icon': Icons.add,
         'onTap': () {
-          Navigator.push(context, AddNewMedicationPage.route(assignedTo: _appProfileController.profile.data!.uid));
+          Navigator.push(
+            context,
+            AddNewMedicationPage.route(
+              assignedTo: _appProfileController.profile.data!.uid,
+            ),
+          );
         },
       },
     ];
@@ -89,13 +95,20 @@ class PatientMorePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Healthy Ways"),
-        leading: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.home)),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.home),
+        ),
         backgroundColor: AppPallete.backgroundColor2,
       ),
       body: ListView.separated(
         itemCount: items.length,
         separatorBuilder:
-            (context, index) => Divider(color: AppPallete.greyColor.withOpacity(0.3), thickness: 0.5, height: 1),
+            (context, index) => Divider(
+              color: AppPallete.greyColor.withOpacity(0.3),
+              thickness: 0.5,
+              height: 1,
+            ),
         itemBuilder: (context, index) {
           final item = items[index];
           return ListTile(

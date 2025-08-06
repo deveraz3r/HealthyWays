@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:healthyways/core/common/entites/profile.dart';
 import 'package:healthyways/core/error/failure.dart';
 import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/features/permission_requests/domain/entities/permission_request.dart';
@@ -20,4 +21,10 @@ abstract class PermissionRequestRepository {
     PermissionStatus status,
   );
   Future<Either<Failure, void>> deleteRequest(String requestId);
+
+  Future<Either<Failure, Profile>> getProfileDataById(String uid);
+  Future<Either<Failure, void>> addProviderId({
+    required String providerId,
+    required String patientId,
+  });
 }

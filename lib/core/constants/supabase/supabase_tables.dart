@@ -25,4 +25,9 @@ class SupabaseTables {
   static String allergiesTable = "allergies";
 
   static String permissionRequestsTable = "permissionRequests";
+
+  //Chat
+  static String chatRoomsTable = "chatRooms";
+  static String messagesTable = "messages";
+  static String seenStatusTable = "seenStatus";
 }

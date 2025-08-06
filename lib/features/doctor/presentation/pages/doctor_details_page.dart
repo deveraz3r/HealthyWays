@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
 import 'package:healthyways/core/common/custom_types/rating.dart';
 import 'package:healthyways/core/common/entites/doctor_profile.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:healthyways/features/doctor/presentation/controllers/doctor_controller.dart';
 
 class DoctorDetailsPage extends StatefulWidget {
-  static route(String doctorId) => MaterialPageRoute(builder: (_) => DoctorDetailsPage(doctorId: doctorId));
+  static route(String doctorId) =>
+      MaterialPageRoute(builder: (_) => DoctorDetailsPage(doctorId: doctorId));
 
   final String doctorId;
   const DoctorDetailsPage({super.key, required this.doctorId});
@@ -22,7 +25,9 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
   @override
   void initState() {
     super.initState();
-    doctor = _doctorController.allDoctors.data!.firstWhere((doc) => doc.uid == widget.doctorId);
+    doctor = _doctorController.allDoctors.data!.firstWhere(
+      (doc) => doc.uid == widget.doctorId,
+    );
   }
 
   @override
@@ -42,7 +47,10 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [AppPallete.gradient1.withOpacity(0.7), AppPallete.backgroundColor2],
+                    colors: [
+                      AppPallete.gradient1.withOpacity(0.7),
+                      AppPallete.backgroundColor2,
+                    ],
                   ),
                 ),
                 child: Center(
@@ -54,13 +62,21 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                         backgroundColor: AppPallete.gradient1,
                         child: Text(
                           '${doctor.fName[0]}${doctor.lName[0]}',
-                          style: const TextStyle(fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 35,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
                       Text(
                         'Dr. ${doctor.fName} ${doctor.lName}',
-                        style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -80,7 +96,10 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   _buildInfoCard(
                     icon: Icons.medical_services_rounded,
                     title: 'Specialty',
-                    content: doctor.specality.isEmpty ? 'General Physician' : doctor.specality,
+                    content:
+                        doctor.specality.isEmpty
+                            ? 'General Physician'
+                            : doctor.specality,
                   ),
                   const SizedBox(height: 16),
 
@@ -88,7 +107,10 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   _buildInfoCard(
                     icon: Icons.school_rounded,
                     title: 'Qualification',
-                    content: doctor.qualification.isEmpty ? 'No qualification details available' : doctor.qualification,
+                    content:
+                        doctor.qualification.isEmpty
+                            ? 'No qualification details available'
+                            : doctor.qualification,
                   ),
                   const SizedBox(height: 16),
 
@@ -96,7 +118,8 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   _buildInfoCard(
                     icon: Icons.person_outline_rounded,
                     title: 'About',
-                    content: doctor.bio.isEmpty ? 'No bio available' : doctor.bio,
+                    content:
+                        doctor.bio.isEmpty ? 'No bio available' : doctor.bio,
                   ),
                   const SizedBox(height: 16),
 
@@ -138,9 +161,16 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        // TODO: Navigate to chat screen
-                        // Navigator.push(context, ChatScreen.route(doctorId: doctor.uid));
+                      onPressed: () async {
+                        final currentUserId =
+                            Get.find<AppProfileController>().profile.data?.uid;
+                        if (currentUserId == null) return;
+
+                        final chatController = Get.find<ChatController>();
+
+                        // For solo chat between current user and this patient
+                        final participantIds = [widget.doctorId, currentUserId];
+                        await chatController.openChatWith(participantIds);
                       },
                       icon: const Icon(Icons.chat_bubble_outline_rounded),
                       label: const Text('Message Doctor'),
@@ -148,7 +178,9 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                         backgroundColor: AppPallete.gradient1,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
@@ -161,7 +193,11 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
     );
   }
 
-  Widget _buildInfoCard({required IconData icon, required String title, required dynamic content}) {
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required dynamic content,
+  }) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -174,11 +210,22 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
               children: [
                 Icon(icon, color: AppPallete.gradient1),
                 const SizedBox(width: 8),
-                Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
-            content is Widget ? content : Text(content, style: TextStyle(color: AppPallete.greyColor, fontSize: 16)),
+            content is Widget
+                ? content
+                : Text(
+                  content,
+                  style: TextStyle(color: AppPallete.greyColor, fontSize: 16),
+                ),
           ],
         ),
       ),
@@ -190,17 +237,29 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
       children: [
         Icon(icon, size: 20, color: AppPallete.greyColor),
         const SizedBox(width: 8),
-        Expanded(child: Text(text, style: TextStyle(color: AppPallete.greyColor, fontSize: 16))),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(color: AppPallete.greyColor, fontSize: 16),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildRatingStats(List<Rating> ratings) {
-    double averageRating = ratings.isEmpty ? 0 : ratings.map((r) => r.stars).reduce((a, b) => a + b) / ratings.length;
+    double averageRating =
+        ratings.isEmpty
+            ? 0
+            : ratings.map((r) => r.stars).reduce((a, b) => a + b) /
+                ratings.length;
 
     return Row(
       children: [
-        Text(averageRating.toStringAsFixed(1), style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold)),
+        Text(
+          averageRating.toStringAsFixed(1),
+          style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(width: 16),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,14 +268,19 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
               children: List.generate(
                 5,
                 (index) => Icon(
-                  index < averageRating ? Icons.star_rounded : Icons.star_border_rounded,
+                  index < averageRating
+                      ? Icons.star_rounded
+                      : Icons.star_border_rounded,
                   color: Colors.amber,
                   size: 24,
                 ),
               ),
             ),
             const SizedBox(height: 4),
-            Text('${ratings.length} reviews', style: TextStyle(color: AppPallete.greyColor, fontSize: 14)),
+            Text(
+              '${ratings.length} reviews',
+              style: TextStyle(color: AppPallete.greyColor, fontSize: 14),
+            ),
           ],
         ),
       ],
@@ -234,7 +298,9 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
               ...List.generate(
                 5,
                 (index) => Icon(
-                  index < rating.stars ? Icons.star_rounded : Icons.star_border_rounded,
+                  index < rating.stars
+                      ? Icons.star_rounded
+                      : Icons.star_border_rounded,
                   color: Colors.amber,
                   size: 16,
                 ),

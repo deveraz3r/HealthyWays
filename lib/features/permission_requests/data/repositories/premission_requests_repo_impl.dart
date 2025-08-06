@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:healthyways/core/common/entites/profile.dart';
 import 'package:healthyways/core/error/failure.dart';
 import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/features/permission_requests/data/datasources/permission_requests_remote_datasource.dart';
@@ -70,6 +71,29 @@ class PermissionRequestRepositoryImpl implements PermissionRequestRepository {
   Future<Either<Failure, void>> deleteRequest(String requestId) async {
     try {
       await remoteDataSource.deleteRequest(requestId);
+      return right(null);
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Profile>> getProfileDataById(String uid) async {
+    try {
+      Profile profile = await remoteDataSource.getProfileDataById(uid);
+      return right(profile);
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addProviderId({
+    required String providerId,
+    required String patientId,
+  }) async {
+    try {
+      await remoteDataSource.addProviderId(providerId, patientId);
       return right(null);
     } catch (e) {
       return left(Failure(e.toString()));

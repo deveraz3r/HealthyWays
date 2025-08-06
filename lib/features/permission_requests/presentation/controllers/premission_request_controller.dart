@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/add_provider_id.dart';
 import 'package:healthyways/features/permission_requests/domain/usecases/create_premission_request.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/delete_permission_request.dart';
+import 'package:healthyways/features/permission_requests/domain/usecases/get_profile_data_by_id.dart';
 import 'package:uuid/uuid.dart';
 import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/controller/controller_state_manager.dart';
@@ -16,6 +19,16 @@ class PermissionRequestController extends GetxController {
   final GetIncomingPermissionRequests _getIncomingPermissionRequests;
   final GetOutgoingPermissionRequests _getOutgoingPermissionRequests;
   final UpdatePermissionStatus _updatePermissionStatus;
+  final GetProfileDataById _getProfileDataById;
+  final DeletePermissionRequest _deletePermissionRequest;
+  final AddProviderId _addProviderId;
+
+  // @override
+  // onInit() {
+  //   super.onInit();
+  //   fetchIncomingRequests();
+  //   fetchOutgoingRequests();
+  // }
 
   PermissionRequestController({
     required AppProfileController appProfileController,
@@ -23,10 +36,16 @@ class PermissionRequestController extends GetxController {
     required GetIncomingPermissionRequests getIncomingPermissionRequests,
     required GetOutgoingPermissionRequests getOutgoingPermissionRequests,
     required UpdatePermissionStatus updatePermissionStatus,
+    required GetProfileDataById getProfileDataById,
+    required DeletePermissionRequest deletePermissionRequest,
+    required AddProviderId addProviderToPatient,
   }) : _appProfileController = appProfileController,
        _createPermissionRequest = createPermissionRequest,
        _getIncomingPermissionRequests = getIncomingPermissionRequests,
        _getOutgoingPermissionRequests = getOutgoingPermissionRequests,
+       _getProfileDataById = getProfileDataById,
+       _deletePermissionRequest = deletePermissionRequest,
+       _addProviderId = addProviderToPatient,
        _updatePermissionStatus = updatePermissionStatus;
 
   final incomingRequests = StateController<Failure, List<PermissionRequest>>();
@@ -91,16 +110,61 @@ class PermissionRequestController extends GetxController {
   }
 
   Future<void> updateRequestStatus(
-    String requestId,
+    PermissionRequest request,
     PermissionStatus status,
   ) async {
     final result = await _updatePermissionStatus(
-      UpdatePermissionStatusParams(requestId: requestId, status: status),
+      UpdatePermissionStatusParams(requestId: request.id, status: status),
     );
 
     result.fold((failure) => Get.snackbar('Error', failure.message), (_) {
       Get.snackbar('Updated', 'Request status updated');
       fetchIncomingRequests();
     });
+
+    if (status == PermissionStatus.accepted) {
+      final addProviderResult = await _addProviderId(
+        AddProviderIdParams(
+          providerId: request.providerId,
+          patientId: request.patientId,
+        ),
+      );
+
+      addProviderResult.fold(
+        (failure) => Get.snackbar('Error', failure.message),
+        (_) => Get.snackbar('Success', 'Provider added to patient'),
+      );
+    }
+  }
+
+  Future<void> deletePermissionRequest(String requestId) async {
+    final result = await _deletePermissionRequest(
+      DeletePermissionRequestParams(requestId: requestId),
+    );
+
+    result.fold((failure) => Get.snackbar('Error', failure.message), (_) {
+      Get.snackbar('Updated', 'Request successfully deleted');
+      fetchOutgoingRequests();
+    });
+  }
+
+  Future<String> getEmailById(String userId) async {
+    final result = await _getProfileDataById(
+      GetProfileDataByIdParams(uid: userId),
+    );
+    return result.fold((failure) {
+      print('Error fetching email for user $userId: ${failure.message}');
+      return 'Unknown';
+    }, (profile) => profile.email);
+  }
+
+  Future<String> getNameById(String userId) async {
+    final result = await _getProfileDataById(
+      GetProfileDataByIdParams(uid: userId),
+    );
+    return result.fold((failure) {
+      print('Error fetching email for user $userId: ${failure.message}');
+      return 'Unknown';
+    }, (profile) => '${profile.fName} ${profile.lName}');
   }
 }

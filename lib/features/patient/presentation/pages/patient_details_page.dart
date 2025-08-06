@@ -5,6 +5,7 @@ import 'package:healthyways/core/common/entites/patient_profile.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/allergies/presentation/controllers/allergie_controller.dart';
 import 'package:healthyways/features/allergies/presentation/pages/allergy_home_page.dart';
+import 'package:healthyways/features/chat/presentation/controllers/chat_controller.dart';
 import 'package:healthyways/features/diary/presentation/controllers/diary_controller.dart';
 import 'package:healthyways/features/diary/presentation/pages/diary_home_page.dart';
 import 'package:healthyways/features/doctor/presentation/widgets/doctor_updates_wrapper.dart';
@@ -13,8 +14,10 @@ import 'package:healthyways/features/immunization/presentation/pages/immunizatio
 import 'package:healthyways/features/measurements/presentation/controllers/measurement_controller.dart';
 import 'package:healthyways/features/measurements/presentation/pages/my_measurements_page.dart';
 import 'package:healthyways/features/medication/presentation/pages/add_new_medication_page.dart';
+import 'package:healthyways/features/patient/presentation/controllers/patient_controller.dart';
+import 'package:healthyways/features/permission_requests/presentation/controllers/premission_request_controller.dart';
 
-class PatientDetailsPage extends StatelessWidget {
+class PatientDetailsPage extends StatefulWidget {
   static route(PatientProfile patient) =>
       MaterialPageRoute(builder: (_) => PatientDetailsPage(patient: patient));
 
@@ -22,9 +25,14 @@ class PatientDetailsPage extends StatelessWidget {
   const PatientDetailsPage({super.key, required this.patient});
 
   @override
+  State<PatientDetailsPage> createState() => _PatientDetailsPageState();
+}
+
+class _PatientDetailsPageState extends State<PatientDetailsPage> {
+  @override
   Widget build(BuildContext context) {
-    final currentUserId = Get.find<AppProfileController>().profile.data!.uid;
-    final isProvider = patient.myProviders.contains(currentUserId);
+    final currentUser = Get.find<AppProfileController>().profile.data!;
+    final isProvider = widget.patient.myProviders.contains(currentUser.uid);
 
     return Scaffold(
       body: CustomScrollView(
@@ -53,7 +61,7 @@ class PatientDetailsPage extends StatelessWidget {
                         radius: 50,
                         backgroundColor: AppPallete.gradient1,
                         child: Text(
-                          '${patient.fName[0]}${patient.lName[0]}',
+                          '${widget.patient.fName[0]}${widget.patient.lName[0]}',
                           style: const TextStyle(
                             fontSize: 35,
                             color: Colors.white,
@@ -63,7 +71,7 @@ class PatientDetailsPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        '${patient.fName} ${patient.lName}',
+                        '${widget.patient.fName} ${widget.patient.lName}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -85,43 +93,43 @@ class PatientDetailsPage extends StatelessWidget {
                   _buildInfoCard(
                     icon: Icons.email,
                     title: 'Email',
-                    content: patient.email,
+                    content: widget.patient.email,
                   ),
                   _buildInfoCard(
                     icon: Icons.person,
                     title: 'Gender',
-                    content: patient.gender,
+                    content: widget.patient.gender,
                   ),
-                  if (patient.address != null)
+                  if (widget.patient.address != null)
                     _buildInfoCard(
                       icon: Icons.location_on,
                       title: 'Address',
-                      content: patient.address!,
+                      content: widget.patient.address!,
                     ),
                   _buildInfoCard(
                     icon: Icons.language,
                     title: 'Preferred Language',
-                    content: patient.preferedLanguage,
+                    content: widget.patient.preferedLanguage,
                   ),
                   _buildInfoCard(
                     icon: Icons.people,
                     title: 'Marital Status',
-                    content: patient.isMarried ? 'Married' : 'Single',
+                    content: widget.patient.isMarried ? 'Married' : 'Single',
                   ),
-                  if (patient.race != null)
+                  if (widget.patient.race != null)
                     _buildInfoCard(
                       icon: Icons.color_lens,
                       title: 'Race',
-                      content: patient.race!,
+                      content: widget.patient.race!,
                     ),
-                  if (patient.emergencyContacts.isNotEmpty)
+                  if (widget.patient.emergencyContacts.isNotEmpty)
                     _buildInfoCard(
                       icon: Icons.contact_emergency,
                       title: 'Emergency Contacts',
                       content: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children:
-                            patient.emergencyContacts
+                            widget.patient.emergencyContacts
                                 .map((e) => Text(e))
                                 .toList(),
                       ),
@@ -137,8 +145,8 @@ class PatientDetailsPage extends StatelessWidget {
                     Icons.warning_amber_rounded,
                     () async {
                       final controller = Get.find<AllergiesController>();
-                      controller.patientId.value = patient.uid;
-                      controller.checkAllergyAccess(patient);
+                      controller.patientId.value = widget.patient.uid;
+                      controller.checkAllergyAccess(widget.patient);
                       Navigator.push(context, AllergyHomePage.route());
                     },
                   ),
@@ -147,8 +155,8 @@ class PatientDetailsPage extends StatelessWidget {
                     Icons.vaccines_rounded,
                     () async {
                       final controller = Get.find<ImmunizationController>();
-                      controller.patientId.value = patient.uid;
-                      controller.checkImmunizationAccess(patient);
+                      controller.patientId.value = widget.patient.uid;
+                      controller.checkImmunizationAccess(widget.patient);
                       Navigator.push(context, ImmunizationHomePage.route());
                     },
                   ),
@@ -159,7 +167,7 @@ class PatientDetailsPage extends StatelessWidget {
                       // TODO: Add navigation
                       MeasurementController measurementController =
                           Get.find<MeasurementController>();
-                      measurementController.patientProfile = patient;
+                      measurementController.patientProfile = widget.patient;
                       measurementController.getMyMeasurements();
                       Navigator.push(context, MyMeasurementsPage.route());
                     },
@@ -169,8 +177,8 @@ class PatientDetailsPage extends StatelessWidget {
                     Icons.menu_book_rounded,
                     () async {
                       final controller = Get.find<DiaryController>();
-                      controller.patientId.value = patient.uid;
-                      controller.checkDiaryAccess(patient);
+                      controller.patientId.value = widget.patient.uid;
+                      controller.checkDiaryAccess(widget.patient);
                       Navigator.push(context, DiaryHomePage.route());
                     },
                   ),
@@ -180,7 +188,7 @@ class PatientDetailsPage extends StatelessWidget {
                     () {
                       Navigator.push(
                         context,
-                        DoctorUpdatesWrapper.route(uid: patient.uid),
+                        DoctorUpdatesWrapper.route(uid: widget.patient.uid),
                       );
                     },
                   ),
@@ -190,27 +198,56 @@ class PatientDetailsPage extends StatelessWidget {
                     () {
                       Navigator.push(
                         context,
-                        AddNewMedicationPage.route(assignedTo: patient.uid),
+                        AddNewMedicationPage.route(
+                          assignedTo: widget.patient.uid,
+                        ),
                       );
                     },
                   ),
                   _buildOptionTile(
                     'Chat',
                     Icons.chat_bubble_outline_rounded,
-                    () {
-                      // TODO: Add chat navigation
+                    () async {
+                      final currentUserId =
+                          Get.find<AppProfileController>().profile.data?.uid;
+                      if (currentUserId == null) return;
+
+                      final chatController = Get.find<ChatController>();
+
+                      // For solo chat between current user and this patient
+                      final participantIds = [
+                        widget.patient.uid,
+                        currentUserId,
+                      ];
+                      await chatController.openChatWith(participantIds);
                     },
                   ),
 
                   _buildOptionTile(
                     isProvider ? 'Remove Provider' : 'Add as Provider',
                     isProvider ? Icons.person_remove : Icons.person_add,
-                    () {
-                      // TODO: Implement add/remove provider logic
+                    () async {
+                      final patientController = Get.find<PatientController>();
+                      final permissionRequestController =
+                          Get.find<PermissionRequestController>();
                       if (isProvider) {
-                        print('Remove provider logic goes here');
+                        setState(() {
+                          widget.patient.myProviders.remove(currentUser.uid);
+                        });
+                        await patientController.updatePatient(widget.patient);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Removed as provider')),
+                        );
                       } else {
-                        print('Add provider logic goes here');
+                        await permissionRequestController.createRequest(
+                          patientId: widget.patient.uid,
+                          providerId: currentUser.uid,
+                          createdByRole: currentUser.selectedRole,
+                        );
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   SnackBar(content: Text('Permission request sent')),
+                        // );
                       }
                     },
                   ),

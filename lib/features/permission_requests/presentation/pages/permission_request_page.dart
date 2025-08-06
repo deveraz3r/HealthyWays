@@ -5,13 +5,27 @@ import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/permission_requests/domain/entities/permission_request.dart';
 import 'package:healthyways/features/permission_requests/presentation/controllers/premission_request_controller.dart';
+import 'package:healthyways/features/permission_requests/presentation/widgets/premission_request_tile.dart';
 
-class PermissionRequestsPage extends StatelessWidget {
+class PermissionRequestsPage extends StatefulWidget {
   const PermissionRequestsPage({super.key});
 
   @override
+  State<PermissionRequestsPage> createState() => _PermissionRequestsPageState();
+}
+
+class _PermissionRequestsPageState extends State<PermissionRequestsPage> {
+  final controller = Get.find<PermissionRequestController>();
+
+  @override
+  void initState() {
+    super.initState();
+    controller.fetchIncomingRequests();
+    controller.fetchOutgoingRequests();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<PermissionRequestController>();
     final profile = Get.find<AppProfileController>().profile.data!;
     final isPatient = profile.selectedRole == Role.patient;
 
@@ -26,7 +40,7 @@ class PermissionRequestsPage extends StatelessWidget {
               labelColor: AppPallete.gradient1,
               unselectedLabelColor: AppPallete.greyColor,
               indicatorColor: AppPallete.gradient1,
-              tabs: [Tab(text: 'Incoming'), Tab(text: 'Outgoing')],
+              tabs: const [Tab(text: 'Incoming'), Tab(text: 'Outgoing')],
             ),
           ),
 
@@ -75,60 +89,19 @@ class PermissionRequestsPage extends StatelessWidget {
                     itemCount: requests.length,
                     itemBuilder: (_, index) {
                       final request = requests[index];
-                      final isPending =
-                          request.status == PermissionStatus.pending;
-                      final fromId =
-                          request.createdByRole == 'patient'
-                              ? request.patientId
-                              : request.providerId;
-
-                      return Card(
-                        color: Colors.grey[900],
-                        child: ListTile(
-                          title: Text(
-                            'From: $fromId',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          subtitle: Text(
-                            'Status: ${request.status.name}',
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                          trailing:
-                              isPending
-                                  ? Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.check,
-                                          color: Colors.green,
-                                        ),
-                                        onPressed:
-                                            () =>
-                                                controller.updateRequestStatus(
-                                                  request.id,
-                                                  PermissionStatus.accepted,
-                                                ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.close,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed:
-                                            () =>
-                                                controller.updateRequestStatus(
-                                                  request.id,
-                                                  PermissionStatus.rejected,
-                                                ),
-                                      ),
-                                    ],
-                                  )
-                                  : Text(
-                                    request.status.name.capitalizeFirst ?? '',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                        ),
+                      return PermissionRequestTile(
+                        request: request,
+                        isIncoming: true,
+                        onAccept:
+                            () => controller.updateRequestStatus(
+                              request,
+                              PermissionStatus.accepted,
+                            ),
+                        onReject:
+                            () => controller.updateRequestStatus(
+                              request,
+                              PermissionStatus.rejected,
+                            ),
                       );
                     },
                   );
@@ -175,40 +148,12 @@ class PermissionRequestsPage extends StatelessWidget {
                     itemCount: requests.length,
                     itemBuilder: (_, index) {
                       final request = requests[index];
-                      final isPending =
-                          request.status == PermissionStatus.pending;
-                      final toId =
-                          request.createdByRole == 'patient'
-                              ? request.providerId
-                              : request.patientId;
-
-                      return Card(
-                        color: Colors.grey[900],
-                        child: ListTile(
-                          title: Text(
-                            'To: $toId',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          subtitle: Text(
-                            'Status: ${request.status.name}',
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                          trailing:
-                              isPending
-                                  ? IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () {
-                                      // TODO: Add delete logic if needed
-                                    },
-                                  )
-                                  : Text(
-                                    request.status.name.capitalizeFirst ?? '',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                        ),
+                      return PermissionRequestTile(
+                        request: request,
+                        isIncoming: false,
+                        onDelete: () {
+                          controller.deletePermissionRequest(request.id);
+                        },
                       );
                     },
                   );
