@@ -18,6 +18,6 @@ class GetPharmacistById
 }
 
 class GetPharmacistByIdParams {
-  final String uid;
-  GetPharmacistByIdParams(this.uid);
+  String uid;
+  GetPharmacistByIdParams({required this.uid});
 }

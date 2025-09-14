@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healthyways/core/common/controllers/app_profile_controller.dart';
-import 'package:healthyways/core/common/entites/doctor_profile.dart';
+import 'package:healthyways/core/common/entites/pharmacist_profile.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
+import 'package:healthyways/features/auth/data/models/pharmacist_profile_model.dart';
 import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
-import 'package:healthyways/features/doctor/presentation/controllers/doctor_controller.dart';
-import 'package:healthyways/core/common/models/doctor_profile_model.dart';
+// import 'package:healthyways/core/common/models/pharmacist_profile_model.dart';
+import 'package:healthyways/features/pharmacist/presentation/controllers/pharmacist_controller.dart';
 
-class DoctorProfilePage extends StatefulWidget {
-  const DoctorProfilePage({super.key});
+class PharmacistProfilePage extends StatefulWidget {
+  const PharmacistProfilePage({super.key});
 
   @override
-  State<DoctorProfilePage> createState() => _DoctorProfilePageState();
+  State<PharmacistProfilePage> createState() => _PharmacistProfilePageState();
 }
 
-class _DoctorProfilePageState extends State<DoctorProfilePage> {
+class _PharmacistProfilePageState extends State<PharmacistProfilePage> {
   final AppProfileController _appProfileController = Get.find();
-  final DoctorController _doctorController = Get.find();
+  final PharmacistController _pharmacistController = Get.find();
 
-  late DoctorProfileModel doctor;
+  late PharmacistProfileModel pharmacist;
 
   final Map<String, bool> _editing = {};
   final Map<String, TextEditingController> _controllers = {};
@@ -26,31 +27,30 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
   @override
   void initState() {
     super.initState();
-    final rawDoctor = _appProfileController.profile.data! as DoctorProfile;
-    doctor = DoctorProfileModel(
-      uid: rawDoctor.uid,
-      email: rawDoctor.email,
-      fName: rawDoctor.fName,
-      lName: rawDoctor.lName,
-      address: rawDoctor.address,
-      gender: rawDoctor.gender,
-      preferedLanguage: rawDoctor.preferedLanguage,
-      selectedRole: rawDoctor.selectedRole,
-      bio: rawDoctor.bio,
-      specality: rawDoctor.specality,
-      qualification: rawDoctor.qualification,
-      rating: rawDoctor.rating,
+    final rawPharmacist =
+        _appProfileController.profile.data! as PharmacistProfile;
+
+    pharmacist = PharmacistProfileModel(
+      uid: rawPharmacist.uid,
+      email: rawPharmacist.email,
+      fName: rawPharmacist.fName,
+      lName: rawPharmacist.lName,
+      address: rawPharmacist.address,
+      gender: rawPharmacist.gender,
+      preferedLanguage: rawPharmacist.preferedLanguage,
+      selectedRole: rawPharmacist.selectedRole,
+      // bio: rawPharmacist.bio,
+      // qualification: rawPharmacist.qualification,
     );
 
-    _initController('fName', doctor.fName);
-    _initController('lName', doctor.lName);
-    _initController('email', doctor.email);
-    _initController('address', doctor.address ?? '');
-    _initController('gender', doctor.gender);
-    _initController('language', doctor.preferedLanguage);
-    _initController('bio', doctor.bio);
-    _initController('specialty', doctor.specality);
-    _initController('qualification', doctor.qualification);
+    _initController('fName', pharmacist.fName);
+    _initController('lName', pharmacist.lName);
+    _initController('email', pharmacist.email);
+    _initController('address', pharmacist.address ?? '');
+    _initController('gender', pharmacist.gender);
+    _initController('language', pharmacist.preferedLanguage);
+    // _initController('bio', pharmacist.bio);
+    // _initController('qualification', pharmacist.qualification);
   }
 
   void _initController(String key, String value) {
@@ -61,21 +61,21 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
   void _saveField(String fieldKey) {
     final updatedValue = _controllers[fieldKey]!.text;
 
-    final updatedDoctor = doctor.copyWith(
+    final updatedPharmacist = pharmacist.copyWith(
       fName: fieldKey == 'fName' ? updatedValue : null,
       lName: fieldKey == 'lName' ? updatedValue : null,
       email: fieldKey == 'email' ? updatedValue : null,
       address: fieldKey == 'address' ? updatedValue : null,
       gender: fieldKey == 'gender' ? updatedValue : null,
       preferedLanguage: fieldKey == 'language' ? updatedValue : null,
-      bio: fieldKey == 'bio' ? updatedValue : null,
-      specality: fieldKey == 'specialty' ? updatedValue : null,
-      qualification: fieldKey == 'qualification' ? updatedValue : null,
+      // bio: fieldKey == 'bio' ? updatedValue : null,
+      // qualification: fieldKey == 'qualification' ? updatedValue : null,
     );
 
-    _doctorController.updateDoctor(updatedDoctor);
+    _pharmacistController.updatePharmacist(updatedPharmacist);
+
     setState(() {
-      doctor = updatedDoctor;
+      pharmacist = updatedPharmacist;
       _editing[fieldKey] = false;
     });
   }
@@ -182,7 +182,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                         radius: 50,
                         backgroundColor: AppPallete.gradient1,
                         child: Text(
-                          '${doctor.fName[0]}${doctor.lName[0]}',
+                          '${pharmacist.fName[0]}${pharmacist.lName[0]}',
                           style: const TextStyle(
                             fontSize: 35,
                             color: Colors.white,
@@ -192,7 +192,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        '${doctor.fName} ${doctor.lName}',
+                        '${pharmacist.fName} ${pharmacist.lName}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -200,7 +200,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                         ),
                       ),
                       Text(
-                        doctor.selectedRole.name.capitalizeFirst ?? '',
+                        pharmacist.selectedRole.name.capitalizeFirst ?? '',
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 16,
@@ -248,29 +248,20 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                     label: 'Preferred Language',
                     fieldKey: 'language',
                   ),
-                  _buildEditableCard(
-                    icon: Icons.school,
-                    label: 'Qualification',
-                    fieldKey: 'qualification',
-                  ),
-                  _buildEditableCard(
-                    icon: Icons.business_center,
-                    label: 'Specialty',
-                    fieldKey: 'specialty',
-                  ),
-                  _buildEditableCard(
-                    icon: Icons.info_outline,
-                    label: 'Bio',
-                    fieldKey: 'bio',
-                    maxLines: 3,
-                  ),
-
+                  // _buildEditableCard(
+                  //   icon: Icons.school,
+                  //   label: 'Qualification',
+                  //   fieldKey: 'qualification',
+                  // ),
+                  // _buildEditableCard(
+                  //   icon: Icons.info_outline,
+                  //   label: 'Bio',
+                  //   fieldKey: 'bio',
+                  //   maxLines: 3,
+                  // ),
                   const SizedBox(height: 24),
-
                   ElevatedButton.icon(
                     onPressed: () {
-                      // Replace with actual logout logic
-                      // TODO: find a way to not use controller of another feature
                       Get.find<AuthController>().signOut();
                     },
                     icon: const Icon(Icons.logout),

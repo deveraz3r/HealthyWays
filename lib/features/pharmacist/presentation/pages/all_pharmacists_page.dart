@@ -6,7 +6,8 @@ import 'package:healthyways/features/pharmacist/presentation/pages/pharmacist_de
 import 'package:healthyways/features/pharmacist/presentation/widgets/pharmacist_card.dart';
 
 class AllPharmacistsPage extends StatefulWidget {
-  static route() => MaterialPageRoute(builder: (_) => const AllPharmacistsPage());
+  static route() =>
+      MaterialPageRoute(builder: (_) => const AllPharmacistsPage());
 
   const AllPharmacistsPage({super.key});
 
@@ -22,7 +23,7 @@ class _AllPharmacistsPageState extends State<AllPharmacistsPage> {
   @override
   void initState() {
     super.initState();
-    _pharmacistController.fetchAllPharmacists();
+    _pharmacistController.getAllPharmacists();
   }
 
   @override
@@ -34,7 +35,10 @@ class _AllPharmacistsPageState extends State<AllPharmacistsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Find Pharmacists'), backgroundColor: AppPallete.backgroundColor2),
+      appBar: AppBar(
+        title: const Text('Find Pharmacists'),
+        backgroundColor: AppPallete.backgroundColor2,
+      ),
       body: Column(
         children: [
           // Search Bar
@@ -46,7 +50,9 @@ class _AllPharmacistsPageState extends State<AllPharmacistsPage> {
               decoration: InputDecoration(
                 hintText: 'Search pharmacists...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -59,15 +65,26 @@ class _AllPharmacistsPageState extends State<AllPharmacistsPage> {
               }
 
               if (_pharmacistController.allPharmacists.hasError) {
-                return Center(child: Text('Error: ${_pharmacistController.allPharmacists.error?.message}'));
+                return Center(
+                  child: Text(
+                    'Error: ${_pharmacistController.allPharmacists.error?.message}',
+                  ),
+                );
               }
 
               final pharmacists =
-                  _pharmacistController.allPharmacists.data!.where((pharmacist) {
+                  _pharmacistController.allPharmacists.data!.where((
+                    pharmacist,
+                  ) {
                     final searchLower = _searchQuery.toLowerCase();
-                    return pharmacist.fName.toLowerCase().contains(searchLower) ||
+                    return pharmacist.fName.toLowerCase().contains(
+                          searchLower,
+                        ) ||
                         pharmacist.lName.toLowerCase().contains(searchLower) ||
-                        (pharmacist.address?.toLowerCase().contains(searchLower) ?? false);
+                        (pharmacist.address?.toLowerCase().contains(
+                              searchLower,
+                            ) ??
+                            false);
                   }).toList();
 
               if (pharmacists.isEmpty) {
@@ -84,7 +101,10 @@ class _AllPharmacistsPageState extends State<AllPharmacistsPage> {
                     child: PharmacistCard(
                       pharmacist: pharmacist,
                       onTap: () {
-                        Navigator.push(context, PharmacistDetailsPage.route(pharmacist.uid));
+                        Navigator.push(
+                          context,
+                          PharmacistDetailsPage.route(pharmacist.uid),
+                        );
                       },
                     ),
                   );

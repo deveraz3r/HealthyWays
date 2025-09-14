@@ -14,7 +14,8 @@ class AddProviderPage extends StatefulWidget {
   State<AddProviderPage> createState() => _AddProviderPageState();
 }
 
-class _AddProviderPageState extends State<AddProviderPage> with SingleTickerProviderStateMixin {
+class _AddProviderPageState extends State<AddProviderPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   final DoctorController _doctorController = Get.find();
@@ -27,7 +28,7 @@ class _AddProviderPageState extends State<AddProviderPage> with SingleTickerProv
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _doctorController.getAllDoctors();
-    _pharmacistController.fetchAllPharmacists();
+    _pharmacistController.getAllPharmacists();
   }
 
   @override
@@ -43,7 +44,10 @@ class _AddProviderPageState extends State<AddProviderPage> with SingleTickerProv
       appBar: AppBar(
         title: const Text('Add Provider'),
         backgroundColor: AppPallete.backgroundColor2,
-        bottom: TabBar(controller: _tabController, tabs: const [Tab(text: 'Doctors'), Tab(text: 'Pharmacists')]),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [Tab(text: 'Doctors'), Tab(text: 'Pharmacists')],
+        ),
       ),
       body: Column(
         children: [
@@ -55,12 +59,17 @@ class _AddProviderPageState extends State<AddProviderPage> with SingleTickerProv
               decoration: InputDecoration(
                 hintText: 'Search providers...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
           Expanded(
-            child: TabBarView(controller: _tabController, children: [_buildDoctorsList(), _buildPharmacistsList()]),
+            child: TabBarView(
+              controller: _tabController,
+              children: [_buildDoctorsList(), _buildPharmacistsList()],
+            ),
           ),
         ],
       ),
@@ -74,7 +83,9 @@ class _AddProviderPageState extends State<AddProviderPage> with SingleTickerProv
       }
 
       if (_doctorController.allDoctors.hasError) {
-        return Center(child: Text('Error: ${_doctorController.allDoctors.error?.message}'));
+        return Center(
+          child: Text('Error: ${_doctorController.allDoctors.error?.message}'),
+        );
       }
 
       final doctors =
@@ -119,7 +130,11 @@ class _AddProviderPageState extends State<AddProviderPage> with SingleTickerProv
       }
 
       if (_pharmacistController.allPharmacists.hasError) {
-        return Center(child: Text('Error: ${_pharmacistController.allPharmacists.error?.message}'));
+        return Center(
+          child: Text(
+            'Error: ${_pharmacistController.allPharmacists.error?.message}',
+          ),
+        );
       }
 
       final pharmacists =

@@ -23,7 +23,7 @@ class _PharmacistDetailsPageState extends State<PharmacistDetailsPage> {
   @override
   void initState() {
     super.initState();
-    _controller.fetchPharmacistById(widget.pharmacistId);
+    _controller.getPharmacistById(widget.pharmacistId);
   }
 
   @override
@@ -34,19 +34,17 @@ class _PharmacistDetailsPageState extends State<PharmacistDetailsPage> {
         backgroundColor: AppPallete.backgroundColor2,
       ),
       body: Obx(() {
-        if (_controller.selectedPharmacist.isLoading) {
+        if (_controller.pharmacist.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (_controller.selectedPharmacist.hasError) {
+        if (_controller.pharmacist.hasError) {
           return Center(
-            child: Text(
-              'Error: ${_controller.selectedPharmacist.error?.message}',
-            ),
+            child: Text('Error: ${_controller.pharmacist.error?.message}'),
           );
         }
 
-        final pharmacist = _controller.selectedPharmacist.data!;
+        final pharmacist = _controller.pharmacist.data!;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),

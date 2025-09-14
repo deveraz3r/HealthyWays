@@ -6,7 +6,6 @@ import 'package:healthyways/features/pharmacist/domain/repositories/pharmacist_r
 
 class GetAllPharmacists implements UseCase<List<PharmacistProfile>, NoParams> {
   final PharmacistRepository repo;
-
   GetAllPharmacists(this.repo);
 
   @override

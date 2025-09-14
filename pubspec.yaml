@@ -25,6 +25,8 @@ dependencies:
   dropdown_search: ^5.0.6
   shimmer: ^3.0.0
   equatable: ^2.0.7
+  google_sign_in: ^7.1.1
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

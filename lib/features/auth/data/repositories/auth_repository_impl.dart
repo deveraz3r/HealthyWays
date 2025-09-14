@@ -1,15 +1,25 @@
+import 'package:flutter/rendering.dart';
+import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/error/exceptions.dart';
 import 'package:healthyways/core/error/failure.dart';
+import 'package:healthyways/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:healthyways/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:healthyways/core/common/entites/profile.dart';
+import 'package:healthyways/features/auth/data/models/profile_model.dart';
 import 'package:healthyways/features/auth/domain/repositories/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
-  AuthRepositoryImpl(this.remoteDataSource);
+  final AuthLocalDataSource localDataSource;
 
+  AuthRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+  });
+
+  //TODO: remove this method and getCurrentUserData from controller directly
   @override
   Future<Either<Failure, Profile>> getCurrentUserData() async {
     try {
@@ -37,6 +47,8 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
       ),
+
+      //also call the rolebase login here if you wan to skip role selection on every login
     );
   }
 
@@ -64,12 +76,86 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
+      //remove cache role so user can select new role on login
+      localDataSource.clearCachedUserRole();
+
       await remoteDataSource.signOut();
       return const Right(null);
     } on sb.AuthException catch (e) {
       return Left(Failure(e.message));
     } on ServerException catch (e) {
       return Left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Profile>> signInWithGoogle() async {
+    return _getUser(() async => await remoteDataSource.signInWithGoogle());
+    //also call the rolebase login here if you wan to skip role selection on every login
+  }
+
+  @override
+  Future<Either<Failure, Profile>> roleBasedLogin({
+    required String uid,
+    required Role selectedRole,
+  }) async {
+    try {
+      debugPrint("fetching Role based profile for $selectedRole");
+
+      debugPrint("Updating base profile with selected role");
+      await remoteDataSource.updateProfileRole(
+        uid: uid,
+        selectedRole: selectedRole,
+      );
+
+      ///get role profile if exists
+      Profile? roleProfile = await remoteDataSource.getRoleProfile(
+        uid,
+        selectedRole,
+      );
+      if (roleProfile != null) {
+        debugPrint("Saving $roleProfile in local storage");
+        localDataSource.cacheUserRole(selectedRole);
+
+        debugPrint("Role profile found! $roleProfile");
+        return Right(roleProfile);
+      }
+
+      debugPrint("Unable to find role profile, creating new one");
+      await remoteDataSource.createRoleProfile(uid, selectedRole);
+
+      roleProfile = await remoteDataSource.getRoleProfile(uid, selectedRole);
+      if (roleProfile == null) {
+        debugPrint("Unable to create role profile");
+        return Left(Failure("Error in creating role profile"));
+      }
+
+      debugPrint("Saving $roleProfile in local storage");
+      localDataSource.cacheUserRole(selectedRole);
+
+      debugPrint("Role profile found! $roleProfile");
+      return Right(roleProfile);
+    } on sb.AuthException catch (e) {
+      debugPrint("Auth Exception: ${e.message}");
+      return Left(Failure(e.message));
+    } on ServerException catch (e) {
+      debugPrint("Server Exception: ${e.message}");
+      return Left(Failure(e.message));
+    } catch (e) {
+      debugPrint("Exception: ${e.toString()}");
+      return Left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Either<Failure, Role?> getCachedUserRole() {
+    try {
+      final response = localDataSource.getCachedUserRole();
+
+      return Right(response);
+    } catch (e) {
+      debugPrint("Error: ${e.toString()}");
+      return Left(Failure(e.toString()));
     }
   }
 }

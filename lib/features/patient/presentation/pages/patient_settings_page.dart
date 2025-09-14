@@ -5,7 +5,8 @@ import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
 
 class PatientSettingsPage extends StatelessWidget {
-  static route() => MaterialPageRoute(builder: (context) => const PatientSettingsPage());
+  static route() =>
+      MaterialPageRoute(builder: (context) => const PatientSettingsPage());
   const PatientSettingsPage({super.key});
 
   void _showLanguagePicker(BuildContext context) {
@@ -19,7 +20,9 @@ class PatientSettingsPage extends StatelessWidget {
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return ListView(
           shrinkWrap: true,
@@ -32,9 +35,11 @@ class PatientSettingsPage extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     // TODO: Save language preference (via controller or local storage)
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Language changed to ${entry.value}')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Language changed to ${entry.value}'),
+                      ),
+                    );
                   },
                 );
               }).toList(),
@@ -46,7 +51,11 @@ class PatientSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> settingsItems = [
-      {'title': 'Preferred Language', 'icon': Icons.language, 'onTap': () => _showLanguagePicker(context)},
+      {
+        'title': 'Preferred Language',
+        'icon': Icons.language,
+        'onTap': () => _showLanguagePicker(context),
+      },
       {
         'title': 'Notifications',
         'icon': CupertinoIcons.bell,
@@ -64,10 +73,10 @@ class PatientSettingsPage extends StatelessWidget {
       {
         'title': 'Logout',
         'icon': Icons.logout,
-        'onTap': () {
-          Get.find<AuthController>().signOut();
+        'onTap': () async {
+          await Get.find<AuthController>().signOut();
           Navigator.pop(context);
-          print("Logout tapped");
+          // print("Logout tapped");
         },
       },
     ];
@@ -75,13 +84,20 @@ class PatientSettingsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
-        leading: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back)),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
+        ),
         backgroundColor: AppPallete.backgroundColor2,
       ),
       body: ListView.separated(
         itemCount: settingsItems.length,
         separatorBuilder:
-            (context, index) => Divider(color: AppPallete.greyColor.withOpacity(0.3), thickness: 0.5, height: 1),
+            (context, index) => Divider(
+              color: AppPallete.greyColor.withOpacity(0.3),
+              thickness: 0.5,
+              height: 1,
+            ),
         itemBuilder: (context, index) {
           final item = settingsItems[index];
           return ListTile(

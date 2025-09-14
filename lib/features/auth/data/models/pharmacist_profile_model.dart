@@ -38,4 +38,26 @@ class PharmacistProfileModel extends PharmacistProfile {
       selectedRole: RoleExtension.fromJson(json['selectedRole']),
     );
   }
+
+  PharmacistProfileModel copyWith({
+    String? uid,
+    String? email,
+    String? fName,
+    String? lName,
+    String? gender,
+    String? address,
+    String? preferedLanguage,
+    Role? selectedRole,
+  }) {
+    return PharmacistProfileModel(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      fName: fName ?? this.fName,
+      lName: lName ?? this.lName,
+      gender: gender ?? this.gender,
+      address: address ?? this.address,
+      preferedLanguage: preferedLanguage ?? this.preferedLanguage,
+      selectedRole: selectedRole ?? this.selectedRole,
+    );
+  }
 }

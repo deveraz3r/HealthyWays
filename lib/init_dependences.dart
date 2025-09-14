@@ -8,10 +8,14 @@ import 'package:healthyways/features/allergies/domain/usecases/delete_allergie_e
 import 'package:healthyways/features/allergies/domain/usecases/get_all_allergie_entries.dart';
 import 'package:healthyways/features/allergies/domain/usecases/update_allergie_entry.dart';
 import 'package:healthyways/features/allergies/presentation/controllers/allergie_controller.dart';
+import 'package:healthyways/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:healthyways/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:healthyways/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:healthyways/features/auth/domain/repositories/auth_repository.dart';
 import 'package:healthyways/features/auth/domain/usecases/current_profile.dart';
+import 'package:healthyways/features/auth/domain/usecases/get_cached_user_role.dart';
+import 'package:healthyways/features/auth/domain/usecases/role_based_login.dart';
+import 'package:healthyways/features/auth/domain/usecases/sign_in_with_google.dart';
 import 'package:healthyways/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:healthyways/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:healthyways/features/auth/domain/usecases/user_sign_up.dart';
@@ -39,7 +43,6 @@ import 'package:healthyways/features/diary/presentation/controllers/diary_contro
 import 'package:healthyways/features/doctor/data/datasources/doctor_remote_data_source.dart';
 import 'package:healthyways/features/doctor/data/repositories/doctor_repository_impl.dart';
 import 'package:healthyways/features/doctor/domain/repositories/doctor_repository.dart';
-import 'package:healthyways/features/doctor/domain/usecases/add_my_patient.dart';
 import 'package:healthyways/features/doctor/domain/usecases/get_all_doctors.dart';
 import 'package:healthyways/features/doctor/domain/usecases/get_doctor_by_id.dart';
 import 'package:healthyways/features/doctor/domain/usecases/update_doctor_profile.dart';
@@ -114,6 +117,7 @@ import 'package:healthyways/features/updates/data/repositories/updates_repositor
 import 'package:healthyways/features/updates/domain/repositories/updates_repository.dart';
 import 'package:healthyways/features/updates/domain/usecases/get_all_medication_schedule_report.dart';
 import 'package:healthyways/features/updates/presentation/controllers/updates_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
@@ -131,6 +135,10 @@ Future<void> initDependencies() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
   serviceLocator.registerSingleton<SupabaseClient>(supabase.client);
+
+  // Initialize SharedPreferences
+  final sharedPrefs = await SharedPreferences.getInstance();
+  serviceLocator.registerSingleton<SharedPreferences>(sharedPrefs);
 
   // Initialize feature-specific dependencies
   // Do not change the secquence of initlization some features depend on others
@@ -152,13 +160,20 @@ Future<void> initDependencies() async {
 
 void _initAuth() {
   // Data sources
-  serviceLocator.registerFactory<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
-  );
+  serviceLocator
+    ..registerFactory<AuthRemoteDataSource>(
+      () => AuthRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+    )
+    ..registerFactory<AuthLocalDataSource>(
+      () => AuthLocalDataSourceImpl(serviceLocator<SharedPreferences>()),
+    );
 
   // Repositories
   serviceLocator.registerFactory<AuthRepository>(
-    () => AuthRepositoryImpl(serviceLocator<AuthRemoteDataSource>()),
+    () => AuthRepositoryImpl(
+      remoteDataSource: serviceLocator<AuthRemoteDataSource>(),
+      localDataSource: serviceLocator<AuthLocalDataSource>(),
+    ),
   );
 
   // Use cases
@@ -171,6 +186,15 @@ void _initAuth() {
     )
     ..registerFactory<UserSignOut>(
       () => UserSignOut(serviceLocator<AuthRepository>()),
+    )
+    ..registerFactory<RoleBasedLogin>(
+      () => RoleBasedLogin(serviceLocator<AuthRepository>()),
+    )
+    ..registerFactory<SignInWithGoogle>(
+      () => SignInWithGoogle(serviceLocator<AuthRepository>()),
+    )
+    ..registerFactory<GetCachedUserRole>(
+      () => GetCachedUserRole(serviceLocator<AuthRepository>()),
     )
     ..registerFactory<CurrentProfile>(
       () => CurrentProfile(serviceLocator<AuthRepository>()),
@@ -186,6 +210,9 @@ void _initAuth() {
       userSignup: serviceLocator<UserSignUp>(),
       userSignIn: serviceLocator<UserSignIn>(),
       userSignOut: serviceLocator<UserSignOut>(),
+      signInWithGoogle: serviceLocator<SignInWithGoogle>(),
+      roleBasedLogin: serviceLocator<RoleBasedLogin>(),
+      getCachedUserRole: serviceLocator<GetCachedUserRole>(),
       appProfileController: serviceLocator<AppProfileController>(),
     ),
   );
@@ -422,9 +449,9 @@ void _initDoctor() {
 
   // Use cases
   serviceLocator
-    ..registerFactory<AddMyPatient>(
-      () => AddMyPatient(serviceLocator<DoctorRepository>()),
-    )
+    // ..registerFactory<AddMyPatient>(
+    //   () => AddMyPatient(serviceLocator<DoctorRepository>()),
+    // )
     ..registerFactory<GetAllDoctors>(
       () => GetAllDoctors(serviceLocator<DoctorRepository>()),
     )
@@ -438,7 +465,7 @@ void _initDoctor() {
   // Controller
   serviceLocator.registerSingleton<DoctorController>(
     DoctorController(
-      addMyPatient: serviceLocator<AddMyPatient>(),
+      // addMyPatient: serviceLocator<AddMyPatient>(),
       getAllDoctors: serviceLocator<GetAllDoctors>(),
       getDoctorById: serviceLocator<GetDoctorById>(),
       updateDoctorProfile: serviceLocator<UpdateDoctorProfile>(),

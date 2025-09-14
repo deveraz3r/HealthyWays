@@ -7,22 +7,22 @@ abstract interface class DoctorRemoteDataSource {
   Future<DoctorProfileModel?> getDoctorProfileById(String uid);
   Future<void> updateDoctorProfile(DoctorProfileModel doctor);
   Future<List<DoctorProfileModel>> getAllDoctors();
-  Future<void> addMyPatient(String patientId);
+  // Future<void> addMyPatient(String patientId);
 }
 
 class DoctorRemoteDataSourceImpl implements DoctorRemoteDataSource {
-  @override
-  Future<void> addMyPatient(String patientId) async {
-    try {
-      // Example: Insert into a doctor_patient_link table
-      await supabaseClient.from('doctor_patient_link').insert({
-        'doctorId': supabaseClient.auth.currentUser!.id,
-        'patientId': patientId,
-      });
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
-  }
+  // @override
+  // Future<void> addMyPatient(String patientId) async {
+  //   try {
+  //     // Example: Insert into a doctor_patient_link table
+  //     await supabaseClient.from('doctor_patient_link').insert({
+  //       'doctorId': supabaseClient.auth.currentUser!.id,
+  //       'patientId': patientId,
+  //     });
+  //   } catch (e) {
+  //     throw ServerException(e.toString());
+  //   }
+  // }
 
   final SupabaseClient supabaseClient;
 

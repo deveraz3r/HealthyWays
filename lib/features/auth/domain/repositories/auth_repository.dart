@@ -1,3 +1,4 @@
+import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/error/failure.dart';
 import 'package:healthyways/core/common/entites/profile.dart';
 import 'package:fpdart/fpdart.dart';
@@ -19,5 +20,12 @@ abstract interface class AuthRepository {
     required String password,
   });
 
+  Future<Either<Failure, Profile>> signInWithGoogle();
+  Future<Either<Failure, Profile>> roleBasedLogin({
+    required String uid,
+    required Role selectedRole,
+  });
+
   Future<Either<Failure, void>> signOut();
+  Either<Failure, Role?> getCachedUserRole();
 }

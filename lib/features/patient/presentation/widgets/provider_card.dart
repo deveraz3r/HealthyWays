@@ -8,7 +8,11 @@ class ProviderCard extends StatefulWidget {
   final String providerId;
   final VoidCallback onRemove;
 
-  const ProviderCard({super.key, required this.providerId, required this.onRemove});
+  const ProviderCard({
+    super.key,
+    required this.providerId,
+    required this.onRemove,
+  });
 
   @override
   State<ProviderCard> createState() => _ProviderCardState();
@@ -29,8 +33,9 @@ class _ProviderCardState extends State<ProviderCard> {
     await _doctorController.getDoctorById(widget.providerId);
 
     // If doctor not found, try pharmacists
-    if (_doctorController.doctor.hasError || _doctorController.doctor.data == null) {
-      await _pharmacistController.fetchPharmacistById(widget.providerId);
+    if (_doctorController.doctor.hasError ||
+        _doctorController.doctor.data == null) {
+      await _pharmacistController.getPharmacistById(widget.providerId);
     }
   }
 
@@ -40,7 +45,10 @@ class _ProviderCardState extends State<ProviderCard> {
       // Check doctor controller state
       if (_doctorController.doctor.isLoading) {
         return const Card(
-          child: Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          ),
         );
       }
 
@@ -55,21 +63,31 @@ class _ProviderCardState extends State<ProviderCard> {
       }
 
       // Check pharmacist controller state
-      if (_pharmacistController.selectedPharmacist.isLoading) {
+      if (_pharmacistController.pharmacist.isLoading) {
         return const Card(
-          child: Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          ),
         );
       }
 
       // If pharmacist found
-      if (_pharmacistController.selectedPharmacist.hasData) {
-        final pharmacist = _pharmacistController.selectedPharmacist.data!;
-        return _buildProviderCard(name: '${pharmacist.fName} ${pharmacist.lName}', role: 'Pharmacist');
+      if (_pharmacistController.pharmacist.hasData) {
+        final pharmacist = _pharmacistController.pharmacist.data!;
+        return _buildProviderCard(
+          name: '${pharmacist.fName} ${pharmacist.lName}',
+          role: 'Pharmacist',
+        );
       }
 
       // If both controllers have errors or no data found
-      if (_doctorController.doctor.hasError || _pharmacistController.selectedPharmacist.hasError) {
-        return _buildProviderCard(name: 'Error loading provider', role: 'Unknown');
+      if (_doctorController.doctor.hasError ||
+          _pharmacistController.pharmacist.hasError) {
+        return _buildProviderCard(
+          name: 'Error loading provider',
+          role: 'Unknown',
+        );
       }
 
       // Default fallback
@@ -77,7 +95,11 @@ class _ProviderCardState extends State<ProviderCard> {
     });
   }
 
-  Widget _buildProviderCard({required String name, required String role, String? speciality}) {
+  Widget _buildProviderCard({
+    required String name,
+    required String role,
+    String? speciality,
+  }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(

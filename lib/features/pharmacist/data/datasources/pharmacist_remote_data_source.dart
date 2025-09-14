@@ -7,17 +7,23 @@ abstract interface class PharmacistRemoteDataSource {
   Future<PharmacistProfileModel?> getPharmacistProfileById(String uid);
   Future<void> updatePharmacistProfile(PharmacistProfileModel pharmacist);
   Future<List<PharmacistProfileModel>> getAllPharmacists();
+  Future<void> addMyPatient(String patientId);
 }
 
 class PharmacistRemoteDataSourceImpl implements PharmacistRemoteDataSource {
   final SupabaseClient supabaseClient;
+
   PharmacistRemoteDataSourceImpl(this.supabaseClient);
 
   @override
   Future<PharmacistProfileModel?> getPharmacistProfileById(String uid) async {
     try {
       final response =
-          await supabaseClient.from(SupabaseTables.fullPharmacistProfilesView).select().eq("uid", uid).single();
+          await supabaseClient
+              .from(SupabaseTables.pharmacistsTable)
+              .select()
+              .eq("uid", uid)
+              .single();
 
       if (response.isEmpty) return null;
 
@@ -28,9 +34,21 @@ class PharmacistRemoteDataSourceImpl implements PharmacistRemoteDataSource {
   }
 
   @override
-  Future<void> updatePharmacistProfile(PharmacistProfileModel pharmacist) async {
+  Future<void> updatePharmacistProfile(
+    PharmacistProfileModel pharmacist,
+  ) async {
     try {
-      await supabaseClient.from("pharmacists").update(pharmacist.toJson()).eq("uid", pharmacist.uid);
+      // Update pharmacist data in pharmacists table
+      await supabaseClient
+          .from(SupabaseTables.pharmacistsTable)
+          .update(pharmacist.toJson())
+          .eq("uid", pharmacist.uid);
+
+      // Update profile data in profiles table
+      await supabaseClient
+          .from(SupabaseTables.baseProfileTable)
+          .update(pharmacist.toJson())
+          .eq("uid", pharmacist.uid);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -39,8 +57,25 @@ class PharmacistRemoteDataSourceImpl implements PharmacistRemoteDataSource {
   @override
   Future<List<PharmacistProfileModel>> getAllPharmacists() async {
     try {
-      final response = await supabaseClient.from(SupabaseTables.fullPharmacistProfilesView).select();
-      return (response as List).map((e) => PharmacistProfileModel.fromJson(e)).toList();
+      final response =
+          await supabaseClient
+              .from(SupabaseTables.fullPharmacistProfilesView)
+              .select();
+      return (response as List)
+          .map((e) => PharmacistProfileModel.fromJson(e))
+          .toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> addMyPatient(String patientId) async {
+    try {
+      await supabaseClient.from('pharmacist_patient_link').insert({
+        'pharmacistId': supabaseClient.auth.currentUser!.id,
+        'patientId': patientId,
+      });
     } catch (e) {
       throw ServerException(e.toString());
     }

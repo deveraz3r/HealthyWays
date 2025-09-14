@@ -17,8 +17,8 @@ class AuthDropdownField extends StatelessWidget {
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(
-          vertical: 15.0,
-          horizontal: 10.0,
+          vertical: 18.0,
+          horizontal: 16.0,
         ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
         filled: true,

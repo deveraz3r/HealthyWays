@@ -11,15 +11,12 @@ class UpdatePharmacistProfile
   UpdatePharmacistProfile(this.repo);
 
   @override
-  Future<Either<Failure, void>> call(
-    UpdatePharmacistProfileParams params,
-  ) async {
+  Future<Either<Failure, void>> call(params) async {
     return await repo.updatePharmacist(params.pharmacist);
   }
 }
 
 class UpdatePharmacistProfileParams {
-  final PharmacistProfile pharmacist;
-
+  PharmacistProfile pharmacist;
   UpdatePharmacistProfileParams({required this.pharmacist});
 }

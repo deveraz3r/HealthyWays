@@ -2,7 +2,9 @@ import 'package:healthyways/core/common/widgets/loader.dart';
 import 'package:healthyways/core/theme/app_pallete.dart';
 import 'package:healthyways/core/utils/show_snackbar.dart';
 import 'package:healthyways/features/auth/presentation/controller/auth_controller.dart';
-import 'package:healthyways/core/controller/state.dart' as controller;
+// ignore: library_prefixes
+import 'package:healthyways/core/controller/state.dart' as StateEnum;
+import 'package:healthyways/features/auth/presentation/pages/role_selection_page.dart';
 import 'package:healthyways/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:healthyways/features/auth/presentation/widgets/auth_field.dart';
 import 'package:healthyways/core/common/widgets/primary_gradient_button.dart';
@@ -25,6 +27,8 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  late Worker _worker;
+
   @override
   void initState() {
     super.initState();
@@ -32,9 +36,10 @@ class _LoginPageState extends State<LoginPage> {
     _authController.getCurrentProfile();
 
     // Listen for state changes and show Snackbar on error
-    ever(_authController.profile.rxState, (state) {
-      if (state == controller.State.error) {
-        final errorMessage = _authController.profile.error?.message ?? "An error occurred.";
+    _worker = ever(_authController.profile.rxState, (state) {
+      if (state == StateEnum.State.error) {
+        final errorMessage =
+            _authController.profile.error?.message ?? "An error occurred.";
         showSnackbar(context, errorMessage);
       }
     });
@@ -42,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
+    _worker.dispose();
     _emailController.dispose();
     _passwordController.dispose();
 
@@ -55,8 +61,9 @@ class _LoginPageState extends State<LoginPage> {
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Obx(() {
-          if (_authController.profile.rxState.value == controller.State.loading) {
-            return Loader();
+          if (_authController.profile.rxState.value ==
+              StateEnum.State.loading) {
+            return const Loader();
           }
 
           return Form(
@@ -64,20 +71,36 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Sign In.', style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Sign In.',
+                  style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 30),
                 AuthField(hintText: "Email", controller: _emailController),
                 const SizedBox(height: 15),
-                AuthField(hintText: "Password", controller: _passwordController, obscureText: true),
+                AuthField(
+                  hintText: "Password",
+                  controller: _passwordController,
+                  obscureText: true,
+                ),
                 const SizedBox(height: 20),
                 PrimaryGradientButton(
                   buttonText: "Login",
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      _authController.signIn(email: _emailController.text, password: _passwordController.text);
+                      _authController.signIn(
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                      );
                     }
                   },
                 ),
+                // PrimaryGradientButton(
+                //   buttonText: "Roles",
+                //   onPressed: () {
+                //     Navigator.push(context, RoleSelectionPage.route());
+                //   },
+                // ),
                 const SizedBox(height: 20),
                 InkWell(
                   onTap: () {
@@ -90,7 +113,8 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         TextSpan(
                           text: "Sign Up",
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppPallete.gradient2),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: AppPallete.gradient2),
                         ),
                       ],
                     ),
