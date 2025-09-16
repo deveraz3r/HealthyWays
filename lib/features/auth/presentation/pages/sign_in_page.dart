@@ -7,6 +7,7 @@ import 'package:healthyways/core/controller/state.dart' as StateEnum;
 import 'package:healthyways/features/auth/presentation/pages/role_selection_page.dart';
 import 'package:healthyways/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:healthyways/features/auth/presentation/widgets/auth_field.dart';
+import 'package:healthyways/features/auth/presentation/widgets/google_sign_in_button.dart';
 import 'package:healthyways/core/common/widgets/primary_gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -95,12 +96,12 @@ class _LoginPageState extends State<LoginPage> {
                     }
                   },
                 ),
-                // PrimaryGradientButton(
-                //   buttonText: "Roles",
-                //   onPressed: () {
-                //     Navigator.push(context, RoleSelectionPage.route());
-                //   },
-                // ),
+                PrimaryGradientButton(
+                  buttonText: "SignOut",
+                  onPressed: () {
+                    _authController.signOut();
+                  },
+                ),
                 const SizedBox(height: 20),
                 InkWell(
                   onTap: () {
@@ -120,6 +121,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
+                // const Spacer(),
+                const SizedBox(height: 20),
+                const Divider(),
+                // const SizedBox(height: 10),
+                GoogleSignInButton(),
               ],
             ),
           );

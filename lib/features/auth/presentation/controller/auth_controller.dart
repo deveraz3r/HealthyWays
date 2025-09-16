@@ -143,7 +143,7 @@ class AuthController extends GetxController {
     );
   }
 
-  Future<void> signInWithGoogle({required Role selectedRole}) async {
+  Future<void> signInWithGoogle() async {
     profile.setLoading();
 
     final result = await _signInWithGoogle(NoParams());

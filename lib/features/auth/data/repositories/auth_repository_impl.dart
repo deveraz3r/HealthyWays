@@ -90,8 +90,47 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Profile>> signInWithGoogle() async {
-    return _getUser(() async => await remoteDataSource.signInWithGoogle());
-    //also call the rolebase login here if you wan to skip role selection on every login
+    try {
+      // Step 1: Sign in with Google
+      final authRes = await remoteDataSource.signInWithGoogle();
+      final user = authRes.user;
+      if (user == null) {
+        return Left(Failure("Google sign-in failed, no user returned"));
+      }
+
+      // Step 2: Try to fetch existing base profile
+      final baseProfile = await remoteDataSource.getBaseProfile(user.id);
+      if (baseProfile != null) {
+        // Existing user, return profile
+        // You can optionally call roleBasedLogin here
+        return Right(baseProfile);
+      }
+
+      // Step 3: New user, create base profile
+      await remoteDataSource.createBaseProfile(
+        uid: user.id,
+        fName: user.userMetadata?['given_name'] ?? '',
+        lName: user.userMetadata?['family_name'] ?? '',
+        email: user.email ?? '',
+        gender: '', // leave empty, user can update later
+        selectedRole: Role.patient, // role not set yet
+      );
+
+      // Step 4: Fetch and return the newly created profile
+      final newProfile = await remoteDataSource.getBaseProfile(user.id);
+      if (newProfile == null) {
+        // Error in creating profile
+        return Left(Failure("Error in creating base profile"));
+      }
+
+      return Right(newProfile);
+    } on sb.AuthException catch (e) {
+      return Left(Failure(e.message));
+    } on ServerException catch (e) {
+      return Left(Failure(e.message));
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
   }
 
   @override

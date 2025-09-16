@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:healthyways/core/common/custom_types/role.dart';
 import 'package:healthyways/core/common/entites/profile.dart';
 import 'package:healthyways/core/constants/supabase/supabase_tables.dart';
@@ -6,7 +7,11 @@ import 'package:healthyways/core/error/exceptions.dart';
 import 'package:healthyways/features/auth/data/factories/profile_factory.dart';
 import 'package:healthyways/features/auth/data/models/profile_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show OAuthProvider;
 
+//supabase.auth.onAuthStateChange.listen((data) {
+//final AuthChangeEvent event = data.session?.user.id;
 abstract interface class AuthRemoteDataSource {
   Session? get currentUserSession;
 
@@ -22,7 +27,7 @@ abstract interface class AuthRemoteDataSource {
     required String uid,
   });
 
-  Future<Profile> signInWithGoogle();
+  Future<AuthResponse> signInWithGoogle();
 
   Future<Profile> signUpWithEmailAndPassword({
     required String fName,
@@ -35,10 +40,17 @@ abstract interface class AuthRemoteDataSource {
 
   Future<void> signOut();
 
+  Future<void> createBaseProfile({
+    required String uid,
+    required String email,
+    required String fName,
+    required String lName,
+    required String gender,
+    Role? selectedRole,
+  });
   Future<Profile?> getBaseProfile(String uid);
 
   Future<Profile?> getRoleProfile(String uid, Role selectedRole);
-
   Future<void> createRoleProfile(String uid, Role selectedRole);
 }
 
@@ -162,25 +174,58 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Profile> signInWithGoogle() {
+  Future<AuthResponse> signInWithGoogle() async {
     if (currentUserSession != null) {
       throw ServerException("User already signed in");
     }
 
-    // TODO: implement signInWithGoogle
-    throw UnimplementedError();
+    final webClientId = dotenv.env['WEB_CLIENT_ID'] ?? '';
+    final iosClientId = dotenv.env['IOS_CLIENT_ID'] ?? '';
+
+    final GoogleSignIn googleSignIn = GoogleSignIn(
+      clientId: iosClientId,
+      serverClientId: webClientId,
+    );
+    final googleUser = await googleSignIn.signIn();
+    final googleAuth = await googleUser!.authentication;
+    final accessToken = googleAuth.accessToken;
+    final idToken = googleAuth.idToken;
+
+    if (accessToken == null) {
+      throw 'No Access Token found.';
+    }
+    if (idToken == null) {
+      throw 'No ID Token found.';
+    }
+
+    return await supabaseClient.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+      accessToken: accessToken,
+    );
   }
 
   @override
-  Future<void> createRoleProfile(String uid, Role selectedRole) async {
+  Future<void> createBaseProfile({
+    required String uid,
+    required String email,
+    required String fName,
+    required String lName,
+    required String gender,
+    Role? selectedRole,
+  }) async {
     if (currentUserSession == null) {
       throw ServerException("User not signed in");
     }
 
     try {
-      // Insert a new row in the role-specific table with only the uid
-      await supabaseClient.from(_getRoleTable(selectedRole)).insert({
+      await supabaseClient.from(SupabaseTables.baseProfileTable).insert({
         "uid": uid,
+        "email": email,
+        "fName": fName,
+        "lName": lName,
+        "gender": gender,
+        "selectedRole": selectedRole?.toJson(),
       });
     } catch (e) {
       throw ServerException(e.toString());
@@ -204,6 +249,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response == null) return null;
 
       return ProfileModel.fromJson(response);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> createRoleProfile(String uid, Role selectedRole) async {
+    if (currentUserSession == null) {
+      throw ServerException("User not signed in");
+    }
+
+    try {
+      // Insert a new row in the role-specific table with only the uid
+      await supabaseClient.from(_getRoleTable(selectedRole)).insert({
+        "uid": uid,
+      });
     } catch (e) {
       throw ServerException(e.toString());
     }
