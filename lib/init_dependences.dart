@@ -128,7 +128,13 @@ final serviceLocator = GetIt.instance;
 Future<void> initDependencies() async {
   // Initialize dependencies here
 
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+    print("✅ .env loaded successfully");
+  } catch (e) {
+    print("❌ Error loading .env: $e");
+    // Don't crash, continue with defaults or show error
+  }
 
   final supabase = await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL'] ?? '',

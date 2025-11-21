@@ -5,7 +5,7 @@ description: "A new Flutter project."
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: ^3.7.2
@@ -37,7 +37,7 @@ dev_dependencies:
 
 flutter_icons:
   #add app icon path in image_path and run "flutter pub run flutter_launcher_icons"
-  image_path: ""
+  image_path: "assets/appicons/playstore.png"
   ios: true
   android: true
 
