@@ -85,4 +85,21 @@ class DoctorProfileModel extends DoctorProfile {
       rating: rating ?? this.rating,
     );
   }
+
+  static DoctorProfileModel fromEntity(DoctorProfile doctor) {
+    return DoctorProfileModel(
+      uid: doctor.uid,
+      email: doctor.email,
+      fName: doctor.fName,
+      lName: doctor.lName,
+      address: doctor.address,
+      gender: doctor.gender,
+      preferedLanguage: doctor.preferedLanguage,
+      selectedRole: doctor.selectedRole,
+      bio: doctor.bio,
+      specality: doctor.specality,
+      qualification: doctor.qualification,
+      rating: doctor.rating,
+    );
+  }
 }

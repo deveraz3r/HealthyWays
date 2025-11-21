@@ -35,7 +35,7 @@ abstract interface class AuthRemoteDataSource {
     required String gender,
     required String email,
     required String password,
-    required String? selectedRole,
+    Role? selectedRole,
   });
 
   Future<void> signOut();
@@ -76,6 +76,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               .eq("uid", currentUserSession!.user.id)
               .single();
 
+      if (baseResponse['selectedRole'] == null) {
+        // return only baseprofile if the user does not exsist
+        // optionally you can also create the new user here now or create at time of role selection
+        // rightnow it is being handled on time of role selection
+        return ProfileFactory.createProfileFromJson(baseResponse);
+      }
       final role = RoleExtension.fromJson(baseResponse['selectedRole']);
 
       // Based on role, fetch complete profile from appropriate view
@@ -86,6 +92,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               .eq("uid", currentUserSession!.user.id)
               .single();
 
+      debugPrint('Role-based response: $response');
       return ProfileFactory.createProfileFromJson(response);
     } catch (e) {
       throw ServerException(e.toString());
@@ -127,7 +134,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String gender,
     required String email,
     required String password,
-    required String? selectedRole,
+    Role? selectedRole,
   }) async {
     try {
       final response = await supabaseClient.auth.signUp(
@@ -137,7 +144,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           "fName": fName,
           "lName": lName,
           "gender": gender,
-          "selectedRole": selectedRole?.toLowerCase() ?? "patient",
+          "selectedRole": selectedRole?.toJson() ?? "patient",
         },
       );
 
@@ -145,14 +152,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw ServerException("User is null");
       }
 
-      await supabaseClient.from(SupabaseTables.baseProfileTable).insert({
-        "uid": response.user!.id, // Pass the user ID as uid
-        "email": email,
-        "fName": fName,
-        "lName": lName,
-        "gender": gender,
-        "selectedRole": selectedRole?.toLowerCase(),
-      });
+      // await supabaseClient.from(SupabaseTables.baseProfileTable).insert({
+      //   "uid": response.user!.id, // Pass the user ID as uid
+      //   "email": email,
+      //   "fName": fName,
+      //   "lName": lName,
+      //   "gender": gender,
+      //   "selectedRole": selectedRole?.toLowerCase(),
+      // });
+
+      // create base profile here or add triggers on database
+      await createBaseProfile(
+        uid: response.user!.id,
+        email: email,
+        fName: fName,
+        lName: lName,
+        gender: gender,
+        selectedRole: selectedRole,
+      );
 
       final Profile? profile = await getCurrentUserData();
 

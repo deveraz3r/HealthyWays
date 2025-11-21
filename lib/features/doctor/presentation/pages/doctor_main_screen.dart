@@ -29,12 +29,12 @@ class _DoctorMainScreenState extends State<DoctorMainScreen> {
         },
         "title": "My Patients",
       },
-      {
-        "onTap": () {
-          Navigator.push(context, AddPatientPage.route());
-        },
-        "title": "Add Patients",
-      },
+      // {
+      //   "onTap": () {
+      //     Navigator.push(context, AddPatientPage.route());
+      //   },
+      //   "title": "Add Patients",
+      // },
     ];
 
     return Padding(

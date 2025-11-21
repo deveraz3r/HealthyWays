@@ -33,6 +33,13 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_icons:
+  #add app icon path in image_path and run "flutter pub run flutter_launcher_icons"
+  image_path: ""
+  ios: true
+  android: true
 
 flutter:
   assets:

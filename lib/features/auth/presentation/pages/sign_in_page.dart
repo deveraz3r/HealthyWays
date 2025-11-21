@@ -96,12 +96,12 @@ class _LoginPageState extends State<LoginPage> {
                     }
                   },
                 ),
-                PrimaryGradientButton(
-                  buttonText: "SignOut",
-                  onPressed: () {
-                    _authController.signOut();
-                  },
-                ),
+                // PrimaryGradientButton(
+                //   buttonText: "SignOut",
+                //   onPressed: () {
+                //     _authController.signOut();
+                //   },
+                // ),
                 const SizedBox(height: 20),
                 InkWell(
                   onTap: () {

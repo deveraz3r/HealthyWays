@@ -5,7 +5,7 @@ import 'package:healthyways/core/error/failure.dart';
 import 'package:healthyways/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:healthyways/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:healthyways/core/common/entites/profile.dart';
-import 'package:healthyways/features/auth/data/models/profile_model.dart';
+// import 'package:healthyways/features/auth/data/models/profile_model.dart';
 import 'package:healthyways/features/auth/domain/repositories/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
@@ -68,7 +68,8 @@ class AuthRepositoryImpl implements AuthRepository {
         gender: gender,
         email: email,
         password: password,
-        selectedRole: selectedRole,
+        selectedRole:
+            selectedRole != null ? RoleExtension.fromJson(selectedRole) : null,
       ),
     );
   }
@@ -93,6 +94,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       // Step 1: Sign in with Google
       final authRes = await remoteDataSource.signInWithGoogle();
+      debugPrint("Google Sign-In Response: ${authRes.user}");
       final user = authRes.user;
       if (user == null) {
         return Left(Failure("Google sign-in failed, no user returned"));
@@ -107,13 +109,26 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       // Step 3: New user, create base profile
+      final fullName =
+          user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? '';
+      String fName = '';
+      String lName = '';
+
+      if (fullName.isNotEmpty) {
+        final parts = fullName.trim().split(' ');
+        fName = parts.first;
+        if (parts.length > 1) {
+          lName = parts.sublist(1).join(' ');
+        }
+      }
+
       await remoteDataSource.createBaseProfile(
         uid: user.id,
-        fName: user.userMetadata?['given_name'] ?? '',
-        lName: user.userMetadata?['family_name'] ?? '',
+        fName: fName,
+        lName: lName,
         email: user.email ?? '',
-        gender: '', // leave empty, user can update later
-        selectedRole: Role.patient, // role not set yet
+        gender: 'male', // Google doesn’t provide gender by default
+        selectedRole: Role.patient,
       );
 
       // Step 4: Fetch and return the newly created profile

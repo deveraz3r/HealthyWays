@@ -35,7 +35,7 @@ class DoctorRepositoryImpl implements DoctorRepository {
   @override
   Future<Either<Failure, void>> updateDoctor(DoctorProfile doctor) async {
     try {
-      await remoteDataSource.updateDoctorProfile(doctor as DoctorProfileModel);
+      await remoteDataSource.updateDoctorProfile(DoctorProfileModel.fromEntity(doctor));
       return const Right(null); //Null means succesful
     } catch (e) {
       return Left(Failure(e.toString()));
